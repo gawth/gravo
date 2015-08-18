@@ -2,50 +2,53 @@ package main
 
 import (
 	"fmt"
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
 	"net/http"
-    "time"
-    "gopkg.in/yaml.v2"
+	"time"
 )
 
-var data = `
-host: 46.101.29.33
-port: 8080
-path: img
-`
+var configFile = "gravo.yml"
 
 type config struct {
-    Host string
-    Port string
-    Path string
+	Host string
+	Port string
+	Path string
 }
 
 func main() {
-    c := config{}
 
-    err := yaml.Unmarshal([]byte(data), &c)
-    if err != nil {
-        log.Fatal("error: %v", err)
-    }
+	// Read config
+	raw, err := ioutil.ReadFile(configFile)
+	if err != nil {
+		log.Fatal("error: %v", err)
+	}
 
-    fmt.Printf("Config: %v\n", c)
+	c := config{}
 
-    for i := 0; i < 10; i++ {
+	err = yaml.Unmarshal([]byte(raw), &c)
+	if err != nil {
+		log.Fatal("error: %v", err)
+	}
 
-        t0 := time.Now()
-        res, err := http.Get("http://" + c.Host + ":" + c.Port + "/" + c.Path)
-        if err != nil {
-            log.Fatal(err)
-        }
-        t1 := time.Now()
+	fmt.Printf("Config: %v\n", c)
 
-        image, err := ioutil.ReadAll(res.Body)
-        res.Body.Close()
-        if err != nil {
-            log.Fatal(err)
-        }
-        fmt.Printf("%d: Got %d bytes, %d meg in %v\n", i, len(image), len(image)/1024/1024, t1.Sub(t0))
+	for i := 0; i < 10; i++ {
 
-    }
+		t0 := time.Now()
+		res, err := http.Get("http://" + c.Host + ":" + c.Port + "/" + c.Path)
+		if err != nil {
+			log.Fatal(err)
+		}
+		t1 := time.Now()
+
+		image, err := ioutil.ReadAll(res.Body)
+		res.Body.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf("%d: Got %d bytes, %d meg in %v\n", i, len(image), len(image)/1024/1024, t1.Sub(t0))
+
+	}
 }
