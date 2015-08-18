@@ -17,20 +17,30 @@ type config struct {
 	Path string
 }
 
-func main() {
-
-	// Read config
-	raw, err := ioutil.ReadFile(configFile)
+func readConfigFile(file string) []byte {
+	f, err := ioutil.ReadFile(file)
 	if err != nil {
 		log.Fatal("error: %v", err)
 	}
+	return f
+}
 
+func convertYaml(raw []byte) config {
 	c := config{}
 
-	err = yaml.Unmarshal([]byte(raw), &c)
+	err := yaml.Unmarshal(raw, &c)
 	if err != nil {
 		log.Fatal("error: %v", err)
 	}
+	return c
+}
+func LoadConfig(file string) config {
+	return convertYaml(readConfigFile(file))
+}
+
+func main() {
+
+	c := LoadConfig("gravo.yml")
 
 	fmt.Printf("Config: %v\n", c)
 
