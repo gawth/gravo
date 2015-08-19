@@ -14,6 +14,7 @@ type config struct {
 		Port string
 		Path string
 	}
+	Requests int
 }
 
 func readConfigFile(file string) []byte {

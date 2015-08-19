@@ -2,3 +2,5 @@ target:
     host: 46.101.29.33
     port: 8080
     path: img
+
+requests: 5

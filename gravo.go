@@ -14,7 +14,8 @@ func main() {
 
 	fmt.Printf("Config: %v\n", c)
 
-	for i := 0; i < 10; i++ {
+	fmt.Printf("Attaching for %d requests\n", c.Requests)
+	for i := 0; i < c.Requests; i++ {
 
 		t0 := time.Now()
 		res, err := http.Get("http://" + c.Target.Host + ":" + c.Target.Port + "/" + c.Target.Path)
