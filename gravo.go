@@ -17,7 +17,7 @@ func main() {
 	for i := 0; i < 10; i++ {
 
 		t0 := time.Now()
-		res, err := http.Get("http://" + c.Host + ":" + c.Port + "/" + c.Path)
+		res, err := http.Get("http://" + c.Target.Host + ":" + c.Target.Port + "/" + c.Target.Path)
 		if err != nil {
 			log.Fatal(err)
 		}

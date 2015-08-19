@@ -9,9 +9,11 @@ import (
 var configFile = "gravo.yml"
 
 type config struct {
-	Host string
-	Port string
-	Path string
+	Target struct {
+		Host string
+		Port string
+		Path string
+	}
 }
 
 func readConfigFile(file string) []byte {
