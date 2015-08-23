@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"io"
 	"net/http"
 	"testing"
@@ -13,7 +14,7 @@ type nopCloser struct {
 
 func (nopCloser) Close() error { return nil }
 
-func TestDoStuff(t *testing.T) {
+func TestDoStuffHappyPath(t *testing.T) {
 	var called = 0
 	var expected = 5
 
@@ -32,4 +33,18 @@ func TestDoStuff(t *testing.T) {
 	if called != expected {
 		t.Errorf("Got %d calls to callTarget, expected %d", called, expected)
 	}
+}
+
+func TestDoStuffHttpError(t *testing.T) {
+	// Override http interaction
+	callTarget = func(target string) (resp *http.Response, err error) {
+		var response http.Response
+		response.Body = nopCloser{bytes.NewBufferString("test data")}
+
+		return nil, errors.New("Expect an error")
+	}
+
+	c := config{Target: target{Host: "testhost", Port: "1234", Path: "path"}, Requests: 5}
+	doStuff(c)
+
 }

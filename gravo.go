@@ -20,7 +20,8 @@ func doStuff(c config) {
 		t0 := time.Now()
 		res, err := callTarget("http://" + c.Target.Host + ":" + c.Target.Port + "/" + c.Target.Path)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
+			continue
 		}
 		t1 := time.Now()
 
