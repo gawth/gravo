@@ -8,17 +8,17 @@ import (
 	"time"
 )
 
-func main() {
+var callTarget = func(target string) (resp *http.Response, err error) {
+	return http.Get(target)
+}
 
-	c := LoadConfig("gravo.yml")
+func doStuff(c config) {
 
-	fmt.Printf("Config: %v\n", c)
-
-	fmt.Printf("Attaching for %d requests\n", c.Requests)
+	fmt.Printf("Attacking for %d requests\n", c.Requests)
 	for i := 0; i < c.Requests; i++ {
 
 		t0 := time.Now()
-		res, err := http.Get("http://" + c.Target.Host + ":" + c.Target.Port + "/" + c.Target.Path)
+		res, err := callTarget("http://" + c.Target.Host + ":" + c.Target.Port + "/" + c.Target.Path)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -32,4 +32,13 @@ func main() {
 		fmt.Printf("%d: Got %d bytes, %d meg in %v\n", i, len(image), len(image)/1024/1024, t1.Sub(t0))
 
 	}
+}
+
+func main() {
+
+	c := LoadConfig("gravo.yml")
+	fmt.Printf("Config: %v\n", c)
+
+	doStuff(c)
+
 }

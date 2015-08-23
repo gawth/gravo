@@ -8,12 +8,13 @@ import (
 
 var configFile = "gravo.yml"
 
+type target struct {
+	Host string
+	Port string
+	Path string
+}
 type config struct {
-	Target struct {
-		Host string
-		Port string
-		Path string
-	}
+	Target   target
 	Requests int
 }
 
