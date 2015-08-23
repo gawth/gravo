@@ -13,9 +13,14 @@ type target struct {
 	Port string
 	Path string
 }
+type runrate struct {
+	Rrate int
+	Rtype string
+}
 type config struct {
 	Target   target
 	Requests int
+	Rate     runrate
 }
 
 func readConfigFile(file string) []byte {

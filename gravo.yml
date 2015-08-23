@@ -4,3 +4,6 @@ target:
     path: img
 
 requests: 5
+rate:
+    rrate: 1
+    rtype: s

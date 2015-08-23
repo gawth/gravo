@@ -27,7 +27,7 @@ func TestDoStuffHappyPath(t *testing.T) {
 		return &response, nil
 	}
 
-	c := config{Target: target{Host: "testhost", Port: "1234", Path: "path"}, Requests: 5}
+	c := config{Target: target{Host: "testhost", Port: "1234", Path: "path"}, Requests: 5, Rate: runrate{Rrate: 1, Rtype: "S"}}
 	doStuff(c)
 
 	if called != expected {
@@ -44,7 +44,7 @@ func TestDoStuffHttpError(t *testing.T) {
 		return nil, errors.New("Expect an error")
 	}
 
-	c := config{Target: target{Host: "testhost", Port: "1234", Path: "path"}, Requests: 5}
+	c := config{Target: target{Host: "testhost", Port: "1234", Path: "path"}, Requests: 5, Rate: runrate{Rrate: 1, Rtype: "S"}}
 	doStuff(c)
 
 }
