@@ -13,11 +13,15 @@ var callTarget = func(target string) (resp *http.Response, err error) {
 	return http.Get(target)
 }
 
-func individualCall(c config, tracker *sync.WaitGroup) {
+var getUrls = func(filename string) (urls []string, err error) {
+	return []string{"url stub"}, nil
+}
+
+func individualCall(u string, tracker *sync.WaitGroup) {
 	defer tracker.Done()
 
 	t0 := time.Now()
-	res, err := callTarget("http://" + c.Target.Host + ":" + c.Target.Port + "/" + c.Target.Path)
+	res, err := callTarget(u)
 	if err != nil {
 		log.Println(err)
 		return
@@ -37,16 +41,28 @@ func individualCall(c config, tracker *sync.WaitGroup) {
 func doStuff(c config) {
 
 	var waitfor = (time.Second / (time.Duration(c.Rate.Rrate) * time.Second)) * time.Second
-
 	tracker := &sync.WaitGroup{}
 
-	fmt.Printf("Attacking for %d requests at a rate of %v\n", c.Requests, waitfor)
-	for i := 0; i < c.Requests; i++ {
+	r, err := c.RequestCount()
+	if err != nil {
+		log.Fatal("error: %v", err)
+	}
+
+	if err != nil {
+		log.Fatal("error: %v", err)
+	}
+
+	fmt.Printf("Attacking for %d requests at a rate of %v\n", r, waitfor)
+	for i := 0; i < r; i++ {
 
 		fmt.Printf("Loop:%d", i)
 
 		tracker.Add(1)
-		go individualCall(c, tracker)
+		u, err := c.Target.Url(i)
+		if err != nil {
+			log.Fatal("error: %v", err)
+		}
+		go individualCall(u, tracker)
 
 		fmt.Println("Sleeping...")
 		time.Sleep(waitfor)
