@@ -18,11 +18,15 @@ type target struct {
 	urls []string
 }
 
+func (t *target) ConstructUrl() string {
+	return "http://" + t.Host + ":" + t.Port + "/" + t.Path
+}
+
 func (t *target) LoadUrls() {
 
 	// If we're not using a file then just construct the URL
 	if t.File == "" {
-		t.urls = []string{"http://" + t.Host + ":" + t.Port + "/" + t.Path}
+		t.urls = []string{t.ConstructUrl()}
 
 	}
 	var err error
@@ -30,13 +34,13 @@ func (t *target) LoadUrls() {
 	if t.urls == nil {
 		t.urls, err = getUrls(t.File)
 		if err != nil {
-			t.urls = []string{"http://" + t.Host + ":" + t.Port + "/" + t.Path}
+			t.urls = []string{t.ConstructUrl()}
 		}
 	}
 }
 func (t *target) Url(index int) (string, error) {
 	if len(t.urls) == 0 {
-		return "http://" + t.Host + ":" + t.Port + "/" + t.Path, nil
+		return t.ConstructUrl(), nil
 	}
 	if index >= len(t.urls) {
 		return "", errors.New(fmt.Sprintf("Attempted to get URL at %d from URLs length %d", index, len(t.urls)))
@@ -52,6 +56,7 @@ type config struct {
 	Target   target
 	Requests int
 	Rate     runrate
+	Verbose  bool
 }
 
 func (c *config) RequestCount() int {

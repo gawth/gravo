@@ -39,3 +39,13 @@ func TestConfigTargetUrlFromUrlsOutOfBoundsCheck(t *testing.T) {
 		t.Errorf("Url call should have generated an error")
 	}
 }
+
+func TestConstructUrl(t *testing.T) {
+	targ := target{Host: "testhost", Port: "1234", Path: "apath"}
+	var expected = "http://testhost:1234/apath"
+
+	actual := targ.ConstructUrl()
+	if actual != expected {
+		t.Errorf("Got '%v' instead of '%v'", actual, expected)
+	}
+}

@@ -9,6 +9,12 @@ import (
 	"time"
 )
 
+func logInfo(c config, s string) {
+	if c.Verbose {
+		fmt.Printf(s)
+	}
+}
+
 var callTarget = func(target string) (resp *http.Response, err error) {
 	return http.Get(target)
 }
@@ -17,7 +23,7 @@ var getUrls = func(filename string) (urls []string, err error) {
 	return []string{"url stub"}, nil
 }
 
-func individualCall(u string, tracker *sync.WaitGroup) {
+func individualCall(u string, c config, tracker *sync.WaitGroup) {
 	defer tracker.Done()
 
 	t0 := time.Now()
@@ -34,7 +40,7 @@ func individualCall(u string, tracker *sync.WaitGroup) {
 		log.Println(err)
 		return
 	}
-	fmt.Printf("Got %d bytes, %d meg in %v\n", len(image), len(image)/1024/1024, t1.Sub(t0))
+	logInfo(c, fmt.Sprintf("Got %d bytes, %d meg in %v\n", len(image), len(image)/1024/1024, t1.Sub(t0)))
 
 }
 
@@ -45,25 +51,25 @@ func doStuff(c config) {
 
 	r := c.RequestCount()
 
-	fmt.Printf("Attacking for %d requests at a rate of %v\n", r, waitfor)
+	logInfo(c, fmt.Sprintf("Attacking for %d requests at a rate of %v\n", r, waitfor))
 	for i := 0; i < r; i++ {
 
-		fmt.Printf("Loop:%d", i)
+		logInfo(c, fmt.Sprintf("Loop:%d\n", i))
 
 		tracker.Add(1)
 		u, err := c.Target.Url(i)
 		if err != nil {
 			log.Fatal("error: %v", err)
 		}
-		go individualCall(u, tracker)
+		go individualCall(u, c, tracker)
 
-		fmt.Println("Sleeping...")
+		logInfo(c, fmt.Sprintf("Sleeping...\n"))
 		time.Sleep(waitfor)
 
 	}
 
 	tracker.Wait()
-	fmt.Println("Done!!")
+	logInfo(c, fmt.Sprintf("Done!!"))
 }
 
 func main() {

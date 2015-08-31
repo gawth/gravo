@@ -36,7 +36,7 @@ func TestDoStuffHappyPath(t *testing.T) {
 	}
 }
 
-func TestDoStuffHttpError(t *testing.T) {
+func TestDoStuffExpectAnError(t *testing.T) {
 	// Override http interaction
 	callTarget = func(target string) (resp *http.Response, err error) {
 		var response http.Response
