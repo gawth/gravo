@@ -36,7 +36,7 @@ func (t *target) Url(index int) (string, error) {
 	if t.File == "" {
 		return "http://" + t.Host + ":" + t.Port + "/" + t.Path, nil
 	}
-	if index > len(t.urls) {
+	if index >= len(t.urls) {
 		return "", errors.New(fmt.Sprintf("Attempted to get URL at %d from URLs length %d", index, len(t.urls)))
 	}
 	return t.urls[index], nil
