@@ -18,22 +18,24 @@ type target struct {
 	urls []string
 }
 
-func (t *target) Urls() ([]string, error) {
+func (t *target) LoadUrls() {
 
 	// If we're not using a file then just construct the URL
 	if t.File == "" {
-		return []string{"http://" + t.Host + ":" + t.Port + "/" + t.Path}, nil
+		t.urls = []string{"http://" + t.Host + ":" + t.Port + "/" + t.Path}
 
 	}
 	var err error
 	// If we've not get any URLs try and get from fie
 	if t.urls == nil {
 		t.urls, err = getUrls(t.File)
+		if err != nil {
+			t.urls = []string{"http://" + t.Host + ":" + t.Port + "/" + t.Path}
+		}
 	}
-	return t.urls, err
 }
 func (t *target) Url(index int) (string, error) {
-	if t.File == "" {
+	if len(t.urls) == 0 {
 		return "http://" + t.Host + ":" + t.Port + "/" + t.Path, nil
 	}
 	if index >= len(t.urls) {
@@ -52,15 +54,15 @@ type config struct {
 	Rate     runrate
 }
 
-func (c *config) RequestCount() (int, error) {
+func (c *config) RequestCount() int {
+	// If requests has been set to > 0 then assume we're dealing with a single repeated
+	// request to a url for now.  Later on we might get a bit more complicated and use
+	// combo of requests and file URLs
+	//
 	if c.Requests != 0 {
-		return c.Requests, nil
+		return c.Requests
 	}
-	urls, err := c.Target.Urls()
-	if err != nil {
-		return 0, err
-	}
-	return len(urls), nil
+	return len(c.Target.urls)
 }
 
 func readConfigFile(file string) []byte {
@@ -80,6 +82,8 @@ func convertYaml(raw []byte) config {
 	}
 	return c
 }
-func LoadConfig(file string) config {
-	return convertYaml(readConfigFile(file))
+func InitialiseConfig(file string) config {
+	c := convertYaml(readConfigFile(file))
+	c.Target.LoadUrls()
+	return c
 }

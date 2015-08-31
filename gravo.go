@@ -43,14 +43,7 @@ func doStuff(c config) {
 	var waitfor = (time.Second / (time.Duration(c.Rate.Rrate) * time.Second)) * time.Second
 	tracker := &sync.WaitGroup{}
 
-	r, err := c.RequestCount()
-	if err != nil {
-		log.Fatal("error: %v", err)
-	}
-
-	if err != nil {
-		log.Fatal("error: %v", err)
-	}
+	r := c.RequestCount()
 
 	fmt.Printf("Attacking for %d requests at a rate of %v\n", r, waitfor)
 	for i := 0; i < r; i++ {
@@ -75,7 +68,7 @@ func doStuff(c config) {
 
 func main() {
 
-	c := LoadConfig("gravo.yml")
+	c := InitialiseConfig("gravo.yml")
 	fmt.Printf("Config: %v\n", c)
 
 	doStuff(c)

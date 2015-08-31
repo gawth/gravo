@@ -72,6 +72,8 @@ func TestUsingaURLFile(t *testing.T) {
 	// Specif the URL file in the config
 	c := config{Target: target{Host: "testhost", Port: "1234", File: "urls.txt"}, Rate: runrate{Rrate: 5, Rtype: "S"}}
 
+	c.Target.LoadUrls()
+
 	doStuff(c)
 
 	if !reflect.DeepEqual(expected, actual) {
