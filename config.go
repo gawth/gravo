@@ -29,13 +29,9 @@ func (t *target) LoadUrls() {
 		t.urls = []string{t.ConstructUrl()}
 
 	}
-	var err error
 	// If we've not get any URLs try and get from fie
 	if t.urls == nil {
-		t.urls, err = getUrls(t.File)
-		if err != nil {
-			t.urls = []string{t.ConstructUrl()}
-		}
+		t.urls, _ = getUrls(t.File)
 	}
 }
 func (t *target) Url(index int) (string, error) {

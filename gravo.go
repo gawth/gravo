@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 )
@@ -19,8 +20,12 @@ var callTarget = func(target string) (resp *http.Response, err error) {
 	return http.Get(target)
 }
 
-var getUrls = func(filename string) (urls []string, err error) {
-	return []string{"url stub"}, nil
+var getUrls = func(filename string) ([]string, error) {
+	content, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
+	return strings.Split(string(content), "\n"), nil
 }
 
 func individualCall(u string, c config, tracker *sync.WaitGroup) {
@@ -44,6 +49,14 @@ func individualCall(u string, c config, tracker *sync.WaitGroup) {
 
 }
 
+func validUrl(url string) bool {
+	if len(url) == 0 {
+		return false
+	}
+
+	return true
+}
+
 func doStuff(c config) {
 
 	var waitfor = (time.Second / (time.Duration(c.Rate.Rrate) * time.Second)) * time.Second
@@ -56,16 +69,18 @@ func doStuff(c config) {
 
 		logInfo(c, fmt.Sprintf("Loop:%d\n", i))
 
-		tracker.Add(1)
 		u, err := c.Target.Url(i)
 		if err != nil {
 			log.Fatal("error: %v", err)
 		}
-		go individualCall(u, c, tracker)
 
-		logInfo(c, fmt.Sprintf("Sleeping...\n"))
-		time.Sleep(waitfor)
+		if validUrl(u) {
+			tracker.Add(1)
+			go individualCall(u, c, tracker)
 
+			logInfo(c, fmt.Sprintf("Sleeping...\n"))
+			time.Sleep(waitfor)
+		}
 	}
 
 	tracker.Wait()

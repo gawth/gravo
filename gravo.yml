@@ -2,8 +2,10 @@ target:
     host: 46.101.29.33
     port: 8080
     path: img
+    file: urls.txt
 
-requests: 5
 rate:
     rrate: 1
     rtype: s
+
+verbose: true
