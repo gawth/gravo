@@ -53,6 +53,7 @@ type config struct {
 	Requests int
 	Rate     runrate
 	Verbose  bool
+	Soap     bool
 }
 
 func (c *config) RequestCount() int {

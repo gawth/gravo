@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -16,8 +18,21 @@ func logInfo(c config, s string) {
 	}
 }
 
-var callTarget = func(target string) (resp *http.Response, err error) {
-	return http.Get(target)
+type nopCloser struct {
+	io.Reader
+}
+
+func (nopCloser) Close() error { return nil }
+
+var callTarget = func(target string, method string, headers http.Header, body io.Reader) (resp *http.Response, err error) {
+	client := &http.Client{}
+
+	req, err := http.NewRequest(method, target, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = headers
+	return client.Do(req)
 }
 
 var getUrls = func(filename string) ([]string, error) {
@@ -32,7 +47,7 @@ func individualCall(u string, c config, tracker *sync.WaitGroup) {
 	defer tracker.Done()
 
 	t0 := time.Now()
-	res, err := callTarget(u)
+	res, err := callTarget(u, "GET", map[string][]string{}, nil)
 	if err != nil {
 		log.Println(err)
 		return
@@ -87,11 +102,34 @@ func doStuff(c config) {
 	logInfo(c, fmt.Sprintf("Done!!"))
 }
 
+func doSoap(c config) {
+	h := http.Header{}
+	h.Add("Host", "www.webservicex.net")
+	h.Add("Content-Type", "application/x-www-form-urlencoded")
+	h.Add("Content-Length", "24")
+
+	resp, err := callTarget("http://www.webservicex.net/geoipservice.asmx/GetGeoIP", "POST", h, nopCloser{bytes.NewBufferString("IPAddress=81.107.183.239")})
+	if err != nil {
+		log.Println(err)
+	}
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		// handle error
+	}
+	in := string(b)
+	log.Println(in)
+
+}
+
 func main() {
 
 	c := InitialiseConfig("gravo.yml")
 	fmt.Printf("Config: %v\n", c)
 
-	doStuff(c)
+	if c.Soap {
+		doSoap(c)
+	} else {
+		doStuff(c)
+	}
 
 }
