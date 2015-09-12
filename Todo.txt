@@ -1,0 +1,4 @@
+1. Try a soap endpoint
+2. Extend for different http verbs
+3. Finish off support for URL file
+4. 
