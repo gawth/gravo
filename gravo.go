@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -18,21 +17,23 @@ func logInfo(c config, s string) {
 	}
 }
 
-type nopCloser struct {
-	io.Reader
-}
-
-func (nopCloser) Close() error { return nil }
-
-var callTarget = func(target string, method string, headers http.Header, body io.Reader) (resp *http.Response, err error) {
+var callTarget = func(target string, method string, headers http.Header, body string) (resp *http.Response, err error) {
 	client := &http.Client{}
 
-	req, err := http.NewRequest(method, target, body)
+	req, err := http.NewRequest(method, target, bytes.NewBufferString(body))
 	if err != nil {
 		return nil, err
 	}
 	req.Header = headers
 	return client.Do(req)
+}
+
+var getSOAPBody = func(filename string) (string, error) {
+	content, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return "", err
+	}
+	return string(content), nil
 }
 
 var getUrls = func(filename string) ([]string, error) {
@@ -47,7 +48,7 @@ func individualCall(u string, c config, tracker *sync.WaitGroup) {
 	defer tracker.Done()
 
 	t0 := time.Now()
-	res, err := callTarget(u, "GET", map[string][]string{}, nil)
+	res, err := callTarget(u, "GET", map[string][]string{}, "")
 	if err != nil {
 		log.Println(err)
 		return
@@ -104,11 +105,18 @@ func doStuff(c config) {
 
 func doSoap(c config) {
 	h := http.Header{}
-	h.Add("Host", "www.webservicex.net")
-	h.Add("Content-Type", "application/x-www-form-urlencoded")
-	h.Add("Content-Length", "24")
+	//h.Add("Host", "www.webservicex.net")
+	h.Add("Host", c.Target.Host)
+	h.Add("Content-Type", "text/xml; charset=utf-8")
 
-	resp, err := callTarget("http://www.webservicex.net/geoipservice.asmx/GetGeoIP", "POST", h, nopCloser{bytes.NewBufferString("IPAddress=81.107.183.239")})
+	body, err := getSOAPBody(c.SoapFile)
+	h.Add("Content-Length", string(len(body)))
+
+	url, err := c.Target.Url(0)
+	if err != nil {
+		log.Fatal("error: %v", err)
+	}
+	resp, err := callTarget(url, "POST", h, body)
 	if err != nil {
 		log.Println(err)
 	}

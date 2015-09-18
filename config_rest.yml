@@ -1,7 +1,8 @@
 target:
-    host: www.webservicex.net
-    port: 80
-    path: geoipservice.asmx/GetGeoIP
+    host: 46.101.29.33
+    port: 8080
+    path: img
+    file: urls.txt
 
 rate:
     rrate: 1
