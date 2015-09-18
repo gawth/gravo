@@ -109,3 +109,39 @@ func TestSoap(t *testing.T) {
 		t.Errorf("getSOAP was called should have been called once, not %d", getSOAPCalled)
 	}
 }
+
+func TestTemplate(t *testing.T) {
+	var expected = "The ip is 9999"
+	var actual = ""
+	var getSOAPCalled = 0
+
+	callTarget = func(target string, method string, header http.Header, body string) (resp *http.Response, err error) {
+		actual = body
+
+		var response http.Response
+		response.Body = nopCloser{bytes.NewBufferString("test data")}
+		return &response, nil
+	}
+
+	getSOAPBody = func(filename string) (string, error) {
+		getSOAPCalled++
+		return "The ip is {{.ip}}", nil
+	}
+	// 1.Needs to read in the message body
+	// 2.Read in the vars file using the first line as the key and then
+	// subsequent lines as values
+	// 3.For each value row call the service having combined the body
+	// template with the row of data
+	//
+	// First iteration, hard code a map for use with body
+
+	c := config{Soap: true, SoapFile: "soap.txt", Target: target{Host: "testhost", Port: "1234", Path: "path"}, Rate: runrate{Rrate: 5, Rtype: "S"}}
+	doSoap(c)
+
+	if expected != actual {
+		t.Errorf("Expected '%s' but got '%s'", expected, actual)
+	}
+	if getSOAPCalled != 1 {
+		t.Errorf("getSOAP was called should have been called once, not %d", getSOAPCalled)
+	}
+}

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strings"
 	"sync"
+	"text/template"
 	"time"
 )
 
@@ -105,25 +106,44 @@ func doStuff(c config) {
 
 func doSoap(c config) {
 	h := http.Header{}
-	//h.Add("Host", "www.webservicex.net")
 	h.Add("Host", c.Target.Host)
 	h.Add("Content-Type", "text/xml; charset=utf-8")
 
-	body, err := getSOAPBody(c.SoapFile)
-	h.Add("Content-Length", string(len(body)))
+	// Can replace this by a template load from file call
+	t, err := getSOAPBody(c.SoapFile)
+
+	tmpl, err := template.New("soap").Parse(t)
+	if err != nil {
+		log.Fatal("error: %v", err)
+	}
+
+	m := make(map[string]string)
+	m["ip"] = "9999"
+
+	var body bytes.Buffer
+	err = tmpl.Execute(&body, m)
+	if err != nil {
+		log.Fatal("error: %v", err)
+	}
+
+	h.Add("Content-Length", string(len(body.String())))
 
 	url, err := c.Target.Url(0)
 	if err != nil {
 		log.Fatal("error: %v", err)
 	}
-	resp, err := callTarget(url, "POST", h, body)
+
+	resp, err := callTarget(url, "POST", h, body.String())
+
 	if err != nil {
 		log.Println(err)
 	}
+
 	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		// handle error
+		log.Fatal("error: %v", err)
 	}
+
 	in := string(b)
 	log.Println(in)
 
