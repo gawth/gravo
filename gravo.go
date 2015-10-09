@@ -12,6 +12,15 @@ import (
 	"time"
 )
 
+type Target interface {
+	Hit()
+}
+
+type Iterator interface {
+	Next(bool) bool
+	Value() Target
+}
+
 func logInfo(c config, s string) {
 	if c.Verbose {
 		fmt.Printf(s)
@@ -74,6 +83,12 @@ func validUrl(url string) bool {
 	return true
 }
 
+func runLoad(i Iterator) {
+	for i.Next(false) {
+		i.Value().Hit()
+	}
+
+}
 func doStuff(c config) {
 
 	var waitfor = (time.Second / (time.Duration(c.Rate.Rrate) * time.Second)) * time.Second

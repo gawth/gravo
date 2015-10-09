@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"reflect"
@@ -144,4 +145,44 @@ func TestTemplate(t *testing.T) {
 	if getSOAPCalled != 1 {
 		t.Errorf("getSOAP was called should have been called once, not %d", getSOAPCalled)
 	}
+}
+
+type stubTarget struct {
+	hits int
+}
+
+func (tg *stubTarget) Hit() {
+	tg.hits++
+	fmt.Println("Hit %d", tg.hits)
+	return
+}
+
+type stubIterator struct {
+	current int
+	finish  int
+	target  Target
+}
+
+func (s stubIterator) Value() Target {
+	return s.target
+}
+func (s *stubIterator) Next(forever bool) bool {
+	if s.current < s.finish {
+		s.current++
+		return true
+	}
+	return false
+}
+
+func TestRunLoad(t *testing.T) {
+
+	tmp := stubTarget{hits: 0}
+
+	it := stubIterator{current: 0, finish: 5, target: &tmp}
+
+	runLoad(&it)
+	if tmp.hits != it.finish {
+		t.Errorf("Expected %d hits but got %d", it.finish, tmp.hits)
+	}
+
 }
