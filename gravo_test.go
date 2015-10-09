@@ -7,7 +7,9 @@ import (
 	"io"
 	"net/http"
 	"reflect"
+	"sync"
 	"testing"
+	"time"
 )
 
 type nopCloser struct {
@@ -151,7 +153,8 @@ type stubTarget struct {
 	hits int
 }
 
-func (tg *stubTarget) Hit() {
+func (tg *stubTarget) Hit(tracker *sync.WaitGroup) {
+	defer tracker.Done()
 	tg.hits++
 	fmt.Println("Hit %d", tg.hits)
 	return
@@ -174,13 +177,35 @@ func (s *stubIterator) Next(forever bool) bool {
 	return false
 }
 
+func TestGetTimeUnit(t *testing.T) {
+	cases := []struct {
+		flag   string
+		result time.Duration
+	}{
+		{"m", time.Millisecond},
+		{"s", time.Second},
+		{"M", time.Minute},
+		{"H", time.Hour},
+		{"x", time.Second},
+	}
+
+	for _, c := range cases {
+		res := getTimeUnit(c.flag)
+		if res != c.result {
+			t.Errorf("getTimeUnit failed.  Expecting %v but got %v", c.result, res)
+		}
+	}
+}
+
 func TestRunLoad(t *testing.T) {
 
 	tmp := stubTarget{hits: 0}
 
 	it := stubIterator{current: 0, finish: 5, target: &tmp}
 
-	runLoad(&it)
+	c := config{Verbose: true, Target: target{Host: "testhost", Port: "1234", Path: "path"}, Requests: 5, Rate: runrate{Rrate: 1, Rtype: "m"}}
+
+	runLoad(c, &it)
 	if tmp.hits != it.finish {
 		t.Errorf("Expected %d hits but got %d", it.finish, tmp.hits)
 	}
