@@ -149,6 +149,26 @@ func TestTemplate(t *testing.T) {
 	}
 }
 
+func TestGetTimeUnit(t *testing.T) {
+	cases := []struct {
+		flag   string
+		result time.Duration
+	}{
+		{"m", time.Millisecond},
+		{"s", time.Second},
+		{"M", time.Minute},
+		{"H", time.Hour},
+		{"x", time.Second},
+	}
+
+	for _, c := range cases {
+		res := getTimeUnit(c.flag)
+		if res != c.result {
+			t.Errorf("getTimeUnit failed.  Expecting %v but got %v", c.result, res)
+		}
+	}
+}
+
 type stubTarget struct {
 	hits int
 }
@@ -175,26 +195,6 @@ func (s *stubIterator) Next(forever bool) bool {
 		return true
 	}
 	return false
-}
-
-func TestGetTimeUnit(t *testing.T) {
-	cases := []struct {
-		flag   string
-		result time.Duration
-	}{
-		{"m", time.Millisecond},
-		{"s", time.Second},
-		{"M", time.Minute},
-		{"H", time.Hour},
-		{"x", time.Second},
-	}
-
-	for _, c := range cases {
-		res := getTimeUnit(c.flag)
-		if res != c.result {
-			t.Errorf("getTimeUnit failed.  Expecting %v but got %v", c.result, res)
-		}
-	}
 }
 
 func TestRunLoad(t *testing.T) {

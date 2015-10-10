@@ -15,7 +15,7 @@ import (
 // Target provides an interface for which the hit method will be called
 // as part of the load test
 type Target interface {
-	Hit(tracker *sync.WaitGroup)
+	Hit(*sync.WaitGroup)
 }
 
 // Iterator is an interface that is used to iterate over a series of targets
