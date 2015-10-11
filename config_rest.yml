@@ -9,5 +9,3 @@ rate:
     rtype: s
 
 verbose: true
-soap: true
-soapfile: soap.txt

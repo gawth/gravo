@@ -2,6 +2,9 @@ package main
 
 import (
 	"bytes"
+	"fmt"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"sync"
 )
@@ -27,8 +30,22 @@ type urlTarget struct {
 
 func (tg *urlTarget) Hit(tracker *sync.WaitGroup) {
 	defer tracker.Done()
-	hitUrl(tg.method, tg.url, tg.body, tg.headers)
+	res, err := hitUrl(tg.method, tg.url, tg.body, tg.headers)
 	//TODO Need to return results from the call but can't just return, need to use a channel
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	//TODO Should return this lot and do it externally
+	image, err := ioutil.ReadAll(res.Body)
+	res.Body.Close()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	//TODO should be timing this as well...again, do it outside of the hit call...
+	log.Println(fmt.Sprintf("Got %d bytes, %d meg\n", len(image), len(image)/1024/1024))
 	return
 }
 

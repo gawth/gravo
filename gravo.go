@@ -109,7 +109,7 @@ func validUrl(url string) bool {
 func runLoad(c config, i Iterator) {
 	var waitfor = time.Duration(c.Rate.Rrate) * getTimeUnit(c.Rate.Rtype)
 
-	logInfo(c, fmt.Sprintf("Interval %d", waitfor))
+	logInfo(c, fmt.Sprintf("Interval %d\n", waitfor))
 	ticker := time.NewTicker(waitfor)
 	done := make(chan bool)
 
@@ -117,7 +117,7 @@ func runLoad(c config, i Iterator) {
 
 	go func(done chan bool) {
 		for t := range ticker.C {
-			logInfo(c, fmt.Sprintf("Tickt at %s", t))
+			logInfo(c, fmt.Sprintf("Tickt at %s\n", t))
 			if i.Next(false) {
 				tracker.Add(1)
 				go i.Value().Hit(tracker)
@@ -131,37 +131,8 @@ func runLoad(c config, i Iterator) {
 
 	<-done
 	tracker.Wait()
-	logInfo(c, fmt.Sprintf("Done!!"))
+	logInfo(c, fmt.Sprintf("Done!!\n"))
 
-}
-func doStuff(c config) {
-
-	var waitfor = (time.Second / (time.Duration(c.Rate.Rrate) * time.Second)) * time.Second
-	tracker := &sync.WaitGroup{}
-
-	r := c.RequestCount()
-
-	logInfo(c, fmt.Sprintf("Attacking for %d requests at a rate of %v\n", r, waitfor))
-	for i := 0; i < r; i++ {
-
-		logInfo(c, fmt.Sprintf("Loop:%d\n", i))
-
-		u, err := c.Target.Url(i)
-		if err != nil {
-			log.Fatal("error: %v", err)
-		}
-
-		if validUrl(u) {
-			tracker.Add(1)
-			go individualCall(u, c, tracker)
-
-			logInfo(c, fmt.Sprintf("Sleeping...\n"))
-			time.Sleep(waitfor)
-		}
-	}
-
-	tracker.Wait()
-	logInfo(c, fmt.Sprintf("Done!!"))
 }
 
 func doSoap(c config) {
@@ -211,13 +182,15 @@ func doSoap(c config) {
 
 func main() {
 
-	c := InitialiseConfig("gravo.yml")
+	c := InitialiseConfig("config_rest.yml")
 	fmt.Printf("Config: %v\n", c)
 
 	if c.Soap {
 		doSoap(c)
 	} else {
-		doStuff(c)
+		//doStuff(c)
+		iterator := urlIterator{urls: c.Target.urls}
+		runLoad(c, &iterator)
 	}
 
 }
