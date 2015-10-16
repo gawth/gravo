@@ -12,10 +12,22 @@ import (
 	"time"
 )
 
+// Timer is an interface used to log timing of calls
+type Timer interface {
+	Start()
+	End()
+	GetTime() time.Duration
+}
+
+//OutputHandler takes the output from the service request and deals with it
+type OutputHandler interface {
+	DealWithIt(http.Response)
+}
+
 // Target provides an interface for which the hit method will be called
 // as part of the load test
 type Target interface {
-	Hit(*sync.WaitGroup)
+	Hit(*sync.WaitGroup, Timer, OutputHandler)
 }
 
 // Iterator is an interface that is used to iterate over a series of targets
@@ -71,35 +83,6 @@ var getUrls = func(filename string) ([]string, error) {
 	return strings.Split(string(content), "\n"), nil
 }
 
-func individualCall(u string, c config, tracker *sync.WaitGroup) {
-	defer tracker.Done()
-
-	t0 := time.Now()
-	res, err := callTarget(u, "GET", map[string][]string{}, "")
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	t1 := time.Now()
-
-	image, err := ioutil.ReadAll(res.Body)
-	res.Body.Close()
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	logInfo(c, fmt.Sprintf("Got %d bytes, %d meg in %v\n", len(image), len(image)/1024/1024, t1.Sub(t0)))
-
-}
-
-func validUrl(url string) bool {
-	if len(url) == 0 {
-		return false
-	}
-
-	return true
-}
-
 // runLoad takes config and an iterator.  It uses the iterator to repeatedly
 // call the hit method on the value returned by the iterator.  The frequency of
 // the calls is based on the Rate defined in the config.
@@ -120,7 +103,7 @@ func runLoad(c config, i Iterator) {
 			logInfo(c, fmt.Sprintf("Tickt at %s\n", t))
 			if i.Next(false) {
 				tracker.Add(1)
-				go i.Value().Hit(tracker)
+				go i.Value().Hit(tracker, &timer{}, &standardOutput{})
 			} else {
 				ticker.Stop()
 				done <- true
@@ -188,7 +171,6 @@ func main() {
 	if c.Soap {
 		doSoap(c)
 	} else {
-		//doStuff(c)
 		iterator := urlIterator{urls: c.Target.urls}
 		runLoad(c, &iterator)
 	}

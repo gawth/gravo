@@ -28,7 +28,7 @@ type urlTarget struct {
 	headers http.Header
 }
 
-func (tg *urlTarget) Hit(tracker *sync.WaitGroup) {
+func (tg *urlTarget) Hit(tracker *sync.WaitGroup, t Timer, h OutputHandler) {
 	defer tracker.Done()
 	res, err := hitUrl(tg.method, tg.url, tg.body, tg.headers)
 	//TODO Need to return results from the call but can't just return, need to use a channel

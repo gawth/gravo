@@ -104,7 +104,7 @@ type stubTarget struct {
 	hits int
 }
 
-func (tg *stubTarget) Hit(tracker *sync.WaitGroup) {
+func (tg *stubTarget) Hit(tracker *sync.WaitGroup, t Timer, h OutputHandler) {
 	defer tracker.Done()
 	tg.hits++
 	fmt.Println("Hit %d", tg.hits)

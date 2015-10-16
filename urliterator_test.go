@@ -6,7 +6,28 @@ import (
 	"reflect"
 	"sync"
 	"testing"
+	"time"
 )
+
+type stubOutput struct {
+}
+
+func (so *stubOutput) DealWithIt(r http.Response) {
+	return
+}
+
+type stubTimer struct {
+}
+
+func (t *stubTimer) Start() {
+	return
+}
+func (t *stubTimer) End() {
+	return
+}
+func (t *stubTimer) GetTime() time.Duration {
+	return time.Second
+}
 
 func TestUrlHit(t *testing.T) {
 	var called = false
@@ -27,7 +48,7 @@ func TestUrlHit(t *testing.T) {
 	target := urlTarget{method: expectedMethod, url: expectedUrl, body: expectedBody, headers: expectedHeaders}
 
 	tracker.Add(1)
-	target.Hit(tracker)
+	target.Hit(tracker, &stubTimer{}, &stubOutput{})
 	tracker.Wait()
 
 }
