@@ -30,12 +30,20 @@ type urlTarget struct {
 
 func (tg *urlTarget) Hit(tracker *sync.WaitGroup, t Timer, h OutputHandler) {
 	defer tracker.Done()
+	t.Start()
+
 	res, err := hitUrl(tg.method, tg.url, tg.body, tg.headers)
+	t.End()
+
 	//TODO Need to return results from the call but can't just return, need to use a channel
 	if err != nil {
 		log.Println(err)
 		return
 	}
+
+	h.DealWithIt(*res)
+	log.Println(fmt.Sprintf("Call took %v\n", t.GetTime()))
+	return
 
 	//TODO Should return this lot and do it externally
 	image, err := ioutil.ReadAll(res.Body)
@@ -45,7 +53,7 @@ func (tg *urlTarget) Hit(tracker *sync.WaitGroup, t Timer, h OutputHandler) {
 		return
 	}
 	//TODO should be timing this as well...again, do it outside of the hit call...
-	log.Println(fmt.Sprintf("Got %d bytes, %d meg\n", len(image), len(image)/1024/1024))
+	log.Println(fmt.Sprintf("Got %d bytes, %d meg in %v\n", len(image), len(image)/1024/1024, t.GetTime()))
 	return
 }
 

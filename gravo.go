@@ -89,7 +89,7 @@ var getUrls = func(filename string) ([]string, error) {
 // Go channels and routines are used to ensure the calls to the hit method
 // are carried out independently.  The Hit method takes a sync function that
 // needs to be called when it has completed
-func runLoad(c config, i Iterator) {
+func runLoad(c config, i Iterator, ti Timer, o OutputHandler) {
 	var waitfor = time.Duration(c.Rate.Rrate) * getTimeUnit(c.Rate.Rtype)
 
 	logInfo(c, fmt.Sprintf("Interval %d\n", waitfor))
@@ -103,7 +103,7 @@ func runLoad(c config, i Iterator) {
 			logInfo(c, fmt.Sprintf("Tickt at %s\n", t))
 			if i.Next(false) {
 				tracker.Add(1)
-				go i.Value().Hit(tracker, &timer{}, &standardOutput{})
+				go i.Value().Hit(tracker, ti, o)
 			} else {
 				ticker.Stop()
 				done <- true
@@ -172,7 +172,7 @@ func main() {
 		doSoap(c)
 	} else {
 		iterator := urlIterator{urls: c.Target.urls}
-		runLoad(c, &iterator)
+		runLoad(c, &iterator, &timer{}, &standardOutput{})
 	}
 
 }

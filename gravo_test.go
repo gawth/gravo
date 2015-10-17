@@ -131,12 +131,14 @@ func (s *stubIterator) Next(forever bool) bool {
 func TestRunLoad(t *testing.T) {
 
 	tmp := stubTarget{hits: 0}
+	timer := stubTimer{}
+	outer := stubOutput{}
 
 	it := stubIterator{current: 0, finish: 5, target: &tmp}
 
 	c := config{Verbose: true, Target: target{Host: "testhost", Port: "1234", Path: "path"}, Requests: 5, Rate: runrate{Rrate: 1, Rtype: "m"}}
 
-	runLoad(c, &it)
+	runLoad(c, &it, &timer, &outer)
 	if tmp.hits != it.finish {
 		t.Errorf("Expected %d hits but got %d", it.finish, tmp.hits)
 	}

@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"io/ioutil"
 	"net/http"
 	"reflect"
 	"sync"
@@ -10,23 +11,34 @@ import (
 )
 
 type stubOutput struct {
+	expectedBody []byte
+	actualBody   []byte
 }
 
 func (so *stubOutput) DealWithIt(r http.Response) {
+	so.actualBody, _ = ioutil.ReadAll(r.Body)
+	r.Body.Close()
+
 	return
 }
 
 type stubTimer struct {
+	start   int
+	end     int
+	gettime int
 }
 
 func (t *stubTimer) Start() {
+	t.start++
 	return
 }
 func (t *stubTimer) End() {
+	t.end++
 	return
 }
 func (t *stubTimer) GetTime() time.Duration {
-	return time.Second
+	t.gettime++
+	return time.Second * 10
 }
 
 func TestUrlHit(t *testing.T) {
@@ -35,11 +47,17 @@ func TestUrlHit(t *testing.T) {
 	var expectedMethod = "a method"
 	var expectedBody = "a body"
 	var expectedHeaders = map[string][]string{}
+
+	testdata := []byte("Test Data")
+	expectedRes := bytes.NewBuffer(testdata)
+
 	tracker := &sync.WaitGroup{}
+	timer := stubTimer{}
+	outer := stubOutput{testdata, nil}
 
 	hitUrl = func(method string, url string, body string, headers http.Header) (resp *http.Response, err error) {
 		var response http.Response
-		response.Body = nopCloser{bytes.NewBufferString("test data")}
+		response.Body = nopCloser{expectedRes}
 
 		called = true
 		return &response, nil
@@ -48,8 +66,26 @@ func TestUrlHit(t *testing.T) {
 	target := urlTarget{method: expectedMethod, url: expectedUrl, body: expectedBody, headers: expectedHeaders}
 
 	tracker.Add(1)
-	target.Hit(tracker, &stubTimer{}, &stubOutput{})
+	target.Hit(tracker, &timer, &outer)
 	tracker.Wait()
+
+	if !called {
+		t.Errorf("TestUrlHit: Hit not called")
+
+	}
+	if timer.start != 1 {
+		t.Errorf("TestUrlHit: Expected start time to be called once, was called %v", timer.start)
+	}
+	if timer.end != 1 {
+		t.Errorf("TestUrlHit: Expected end time to be called once, was called %v", timer.end)
+	}
+	if timer.gettime == 0 {
+		t.Errorf("TestUrlHit: Expected GetTime to be called")
+	}
+
+	if !bytes.Equal(outer.expectedBody, outer.actualBody) {
+		t.Errorf("TestUrlHit: Expected output of '%v' but got '%v'", string(outer.expectedBody), string(outer.actualBody))
+	}
 
 }
 
