@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"strings"
 	"sync"
 	"text/template"
 	"time"
@@ -73,14 +72,6 @@ var getSOAPBody = func(filename string) (string, error) {
 		return "", err
 	}
 	return string(content), nil
-}
-
-var getUrls = func(filename string) ([]string, error) {
-	content, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return nil, err
-	}
-	return strings.Split(string(content), "\n"), nil
 }
 
 // runLoad takes config and an iterator.  It uses the iterator to repeatedly
@@ -171,6 +162,7 @@ func main() {
 	if c.Soap {
 		doSoap(c)
 	} else {
+		logInfo(c, fmt.Sprintf("Number of URLs is :%v\n", len(c.Target.urls)))
 		iterator := urlIterator{urls: c.Target.urls}
 		runLoad(c, &iterator, &timer{}, &standardOutput{})
 	}

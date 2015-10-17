@@ -6,9 +6,29 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
+	"strings"
 )
 
 var configFile = "gravo.yml"
+
+func deleteBlanks(s []string) []string {
+	//TODO Need a test for this!
+	var r []string
+	for _, str := range s {
+		if str != "" {
+			r = append(r, str)
+		}
+	}
+	return r
+}
+
+var getUrls = func(filename string) ([]string, error) {
+	content, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
+	return deleteBlanks(strings.Split(string(content), "\n")), nil
+}
 
 type target struct {
 	Host string
