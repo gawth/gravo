@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"strings"
+	"text/template"
 )
 
 var configFile = "gravo.yml"
@@ -69,12 +70,13 @@ type runrate struct {
 	Rtype string
 }
 type config struct {
-	Target   target
-	Requests int
-	Rate     runrate
-	Verbose  bool
-	Soap     bool
-	SoapFile string
+	Target       target
+	Requests     int
+	Rate         runrate
+	Verbose      bool
+	Soap         bool
+	SoapFile     string
+	soapTemplate *template.Template
 }
 
 func (c *config) RequestCount() int {
@@ -105,8 +107,27 @@ func convertYaml(raw []byte) config {
 	}
 	return c
 }
+
+func loadTemplate(filename string) (*template.Template, error) {
+	t, err := template.ParseFiles(filename)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return t, nil
+}
+
 func InitialiseConfig(file string) config {
 	c := convertYaml(readConfigFile(file))
 	c.Target.LoadUrls()
+
+	if c.Soap {
+		tmp, err := loadTemplate(c.SoapFile)
+		if err != nil {
+			log.Fatal("Config: Unable to load SOAP template %v err: %v", file, err)
+		}
+		c.soapTemplate = tmp
+	}
 	return c
 }

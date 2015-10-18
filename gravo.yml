@@ -1,7 +1,7 @@
 target:
     host: www.webservicex.net
     port: 80
-    path: geoipservice.asmx/GetGeoIP
+    path: geoipservice.asmx
 
 rate:
     rrate: 1

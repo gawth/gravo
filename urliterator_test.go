@@ -79,9 +79,6 @@ func TestUrlHit(t *testing.T) {
 	if timer.end != 1 {
 		t.Errorf("TestUrlHit: Expected end time to be called once, was called %v", timer.end)
 	}
-	if timer.gettime == 0 {
-		t.Errorf("TestUrlHit: Expected GetTime to be called")
-	}
 
 	if !bytes.Equal(outer.expectedBody, outer.actualBody) {
 		t.Errorf("TestUrlHit: Expected output of '%v' but got '%v'", string(outer.expectedBody), string(outer.actualBody))

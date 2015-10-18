@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"sync"
-	"text/template"
 	"time"
 )
 
@@ -66,14 +65,6 @@ var callTarget = func(target string, method string, headers http.Header, body st
 	return client.Do(req)
 }
 
-var getSOAPBody = func(filename string) (string, error) {
-	content, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return "", err
-	}
-	return string(content), nil
-}
-
 // runLoad takes config and an iterator.  It uses the iterator to repeatedly
 // call the hit method on the value returned by the iterator.  The frequency of
 // the calls is based on the Rate defined in the config.
@@ -114,19 +105,11 @@ func doSoap(c config) {
 	h.Add("Host", c.Target.Host)
 	h.Add("Content-Type", "text/xml; charset=utf-8")
 
-	// Can replace this by a template load from file call
-	t, err := getSOAPBody(c.SoapFile)
-
-	tmpl, err := template.New("soap").Parse(t)
-	if err != nil {
-		log.Fatal("error: %v", err)
-	}
-
 	m := make(map[string]string)
 	m["ip"] = "9999"
 
 	var body bytes.Buffer
-	err = tmpl.Execute(&body, m)
+	err := c.soapTemplate.Execute(&body, m)
 	if err != nil {
 		log.Fatal("error: %v", err)
 	}
@@ -156,7 +139,7 @@ func doSoap(c config) {
 
 func main() {
 
-	c := InitialiseConfig("config_rest.yml")
+	c := InitialiseConfig("gravo.yml")
 	fmt.Printf("Config: %v\n", c)
 
 	if c.Soap {
