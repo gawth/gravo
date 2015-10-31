@@ -5,7 +5,7 @@ import ()
 type soapIterator struct {
 	url      string
 	columns  []string
-	data     map[string]string
+	data     []map[string]string
 	position int
 }
 

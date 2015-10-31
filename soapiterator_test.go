@@ -9,13 +9,16 @@ func TestSoapIterator(t *testing.T) {
 	var col1 = "c1"
 	var col2 = "c2"
 	var col3 = "c3"
-	var testdata = make(map[string]string)
-	testdata[col1] = "data1"
-	testdata[col2] = "data2"
-	testdata[col3] = "data3"
 	var testcols = []string{col1, col2, col3}
+	var testurl = "test url"
 
-	var it = soapIterator{url: "test url", columns: testcols, data: testdata}
+	var td = []map[string]string{{
+		col1: "data1",
+		col2: "data2",
+		col3: "data3",
+	}}
+
+	var it = soapIterator{url: testurl, columns: testcols, data: td}
 	var called = 0
 
 	expected := reflect.TypeOf(&urlTarget{})
@@ -26,8 +29,17 @@ func TestSoapIterator(t *testing.T) {
 			t.Errorf("TestSoapIterator: Expected %v but got %v", expected, typ)
 		}
 		called++
+
+		// the vall to reflect.ValueOf returns a Value type from the reflect package
+		// In this case that value type contains an interface so we get at the Interface using the
+		// Interface function.  We can then cast that to urlTarget
+		//
+		var concreteTarget = reflect.ValueOf(it.Value()).Interface().(*urlTarget)
+		if concreteTarget.url != testurl {
+			t.Errorf("TestSoapterator: Expected url %v but got %v", testurl, concreteTarget.url)
+		}
 	}
-	if called != 1 {
-		t.Errorf("TestSoapterator: Expected next %v times but got %v", 1, called)
+	if called != len(td) {
+		t.Errorf("TestSoapterator: Expected next %v times but got %v", len(td), called)
 	}
 }
