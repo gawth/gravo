@@ -1,3 +1,4 @@
+4a. Need to add a new method to soap iterator that includes a check on whether slices are correct length
 5. Plumb interfaces for SOAP handling
 5a. Write tests for iterator
 5b. Update config (and tests) to correctly load and parse the template
@@ -6,6 +7,8 @@
 6. Code review to get rid of any dodgy bits
 6a. Run golang tools to validate code
 6b. Code coverage and update tests where appropriate
+6c. Rename package and review file structures
+6d. Clean out junk from gravo
 
 
 DONE
