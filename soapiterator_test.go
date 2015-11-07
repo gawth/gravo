@@ -25,7 +25,8 @@ func TestSoapIterator(t *testing.T) {
 	expected := reflect.TypeOf(&urlTarget{})
 
 	for it.Next(false) {
-		typ := reflect.TypeOf(it.Value())
+		val, _ := it.Value()
+		typ := reflect.TypeOf(val)
 		if typ != expected {
 			t.Errorf("TestSoapIterator: Expected %v but got %v", expected, typ)
 		}
@@ -35,7 +36,7 @@ func TestSoapIterator(t *testing.T) {
 		// In this case that value type contains an interface so we get at the Interface using the
 		// Interface function.  We can then cast that to urlTarget
 		//
-		var concreteTarget = reflect.ValueOf(it.Value()).Interface().(*urlTarget)
+		var concreteTarget = reflect.ValueOf(val).Interface().(*urlTarget)
 		if concreteTarget.url != testurl {
 			t.Errorf("TestSoapterator: Expected url %v but got %v", testurl, concreteTarget.url)
 		}
@@ -79,12 +80,43 @@ func TestSoapTemplate(t *testing.T) {
 	for it.Next(false) {
 		called++
 
-		var concreteTarget = reflect.ValueOf(it.Value()).Interface().(*urlTarget)
+		val, _ := it.Value()
+
+		var concreteTarget = reflect.ValueOf(val).Interface().(*urlTarget)
 		if concreteTarget.body != expectedBody {
 			t.Errorf("TestSoapTemplate: Incorrect body '%v'", concreteTarget.body)
 		}
 	}
 	if called != len(td) {
 		t.Errorf("TestSoapTemplate: Expected next %v times but got %v", len(td), called)
+	}
+}
+
+func TestErrorCreatingSoapTemplate(t *testing.T) {
+	var col1 = "c1"
+	var col2 = "c2"
+	var col3 = "c3"
+	var testcols = []string{col1, col2, col3}
+	var testurl = "test url"
+
+	var dataError = [][]string{
+		{
+			"data1",
+			"data2",
+		},
+	}
+
+	tmpl, err := template.New("test").Parse("")
+	if err != nil {
+		t.Errorf("TestErrorCreatingSoapTemplate: Failed to parse the test template:%v", err)
+	}
+
+	var it = soapIterator{url: testurl, columns: testcols, data: dataError, template: tmpl}
+	for it.Next(false) {
+		_, err := it.Value()
+		if err == nil {
+			t.Errorf("TestErrorCreatingSoapTemplate: Expected an error but didn't get one")
+		}
+
 	}
 }

@@ -2,6 +2,7 @@ package gravo
 
 import (
 	"bytes"
+	"fmt"
 	"log"
 	"text/template"
 )
@@ -21,9 +22,12 @@ func (it *soapIterator) Next(continuous bool) bool {
 	it.position++
 	return true
 }
-func (it *soapIterator) Value() Target {
+func (it *soapIterator) Value() (Target, error) {
 	var body bytes.Buffer
 
+	if len(it.data[it.position-1]) != len(it.columns) {
+		return &urlTarget{}, fmt.Errorf("soapIterator: Incorrect number of data items line %v.  Expected %v but got %v", it.position-1, len(it.columns), len(it.data[it.position-1]))
+	}
 	if it.template != nil {
 
 		var tmpMap = make(map[string]string)
@@ -40,5 +44,5 @@ func (it *soapIterator) Value() Target {
 	}
 
 	retVal := urlTarget{method: "POST", url: it.url, body: body.String()}
-	return &retVal
+	return &retVal, nil
 }
