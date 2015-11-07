@@ -1,4 +1,4 @@
-package main
+package gravo
 
 import (
 	"errors"
@@ -39,7 +39,7 @@ type target struct {
 	urls []string
 }
 
-func (t *target) ConstructUrl() string {
+func (t *target) ConstructURL() string {
 	return "http://" + t.Host + ":" + t.Port + "/" + t.Path
 }
 
@@ -47,7 +47,7 @@ func (t *target) LoadUrls() {
 
 	// If we're not using a file then just construct the URL
 	if t.File == "" {
-		t.urls = []string{t.ConstructUrl()}
+		t.urls = []string{t.ConstructURL()}
 
 	}
 	// If we've not get any URLs try and get from fie
@@ -55,9 +55,9 @@ func (t *target) LoadUrls() {
 		t.urls, _ = getUrls(t.File)
 	}
 }
-func (t *target) Url(index int) (string, error) {
+func (t *target) URL(index int) (string, error) {
 	if len(t.urls) == 0 {
-		return t.ConstructUrl(), nil
+		return t.ConstructURL(), nil
 	}
 	if index >= len(t.urls) {
 		return "", errors.New(fmt.Sprintf("Attempted to get URL at %d from URLs length %d", index, len(t.urls)))

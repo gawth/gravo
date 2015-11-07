@@ -1,4 +1,4 @@
-package main
+package gravo
 
 import (
 	"bytes"
@@ -116,7 +116,7 @@ func doSoap(c config) {
 
 	h.Add("Content-Length", string(len(body.String())))
 
-	url, err := c.Target.Url(0)
+	url, err := c.Target.URL(0)
 	if err != nil {
 		log.Fatal("error: %v", err)
 	}
