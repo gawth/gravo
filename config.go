@@ -1,11 +1,14 @@
 package gravo
 
 import (
+	"bufio"
+	"encoding/csv"
 	"errors"
 	"fmt"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
+	"os"
 	"strings"
 	"text/template"
 )
@@ -76,6 +79,9 @@ type config struct {
 	Verbose      bool
 	Soap         bool
 	SoapFile     string
+	SoapDataFile string
+	columns      []string
+	data         [][]string
 	soapTemplate *template.Template
 }
 
@@ -128,6 +134,25 @@ func InitialiseConfig(file string) config {
 			log.Fatal("Config: Unable to load SOAP template %v err: %v", file, err)
 		}
 		c.soapTemplate = tmp
+
+		//TODO Need to clean this up
+		f, err := os.Open(c.SoapDataFile)
+		if err != nil {
+			log.Fatal("Config: Unable to open soap data file (%v): %v", c.SoapDataFile, err)
+		}
+		reader := csv.NewReader(bufio.NewReader(f))
+
+		raw, err := reader.ReadAll()
+		if err != nil {
+			log.Fatal("Config: Unable to read soap data file (%v): %v", c.SoapDataFile, err)
+		}
+		if len(raw) < 2 {
+			log.Fatal("Config: Too few lines (%v) in SOAP data file", len(raw))
+		}
+		// First row "should" contain headers (how to check?)
+		c.columns = raw[0]
+		// The rest of the file is the data
+		c.data = raw[1:len(raw)]
 	}
 	return c
 }
