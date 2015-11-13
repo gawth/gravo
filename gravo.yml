@@ -10,3 +10,4 @@ rate:
 verbose: true
 soap: true
 soapfile: soap.txt
+soapdatafile: data.txt
