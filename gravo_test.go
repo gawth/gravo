@@ -76,8 +76,8 @@ type stubIterator struct {
 	target  Target
 }
 
-func (s stubIterator) Value() Target {
-	return s.target
+func (s stubIterator) Value() (Target, error) {
+	return s.target, nil
 }
 func (s *stubIterator) Next(forever bool) bool {
 	if s.current < s.finish {

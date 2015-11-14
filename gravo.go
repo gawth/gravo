@@ -31,7 +31,7 @@ type Target interface {
 // Iterator is an interface that is used to iterate over a series of targets
 type Iterator interface {
 	Next(bool) bool
-	Value() Target
+	Value() (Target, error)
 }
 
 func logInfo(c config, s string) {
@@ -84,8 +84,13 @@ func runLoad(c config, i Iterator, ti Timer, o OutputHandler) {
 		for t := range ticker.C {
 			logInfo(c, fmt.Sprintf("Tickt at %s\n", t))
 			if i.Next(false) {
+				v, err := i.Value()
+				if err != nil {
+					logInfo(c, fmt.Sprintf("Error from iterator value so skipping this value :%s\n", err))
+					continue
+				}
 				tracker.Add(1)
-				go i.Value().Hit(tracker, ti, o)
+				go v.Hit(tracker, ti, o)
 			} else {
 				ticker.Stop()
 				done <- true

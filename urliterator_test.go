@@ -94,7 +94,8 @@ func TestUrlIterator(t *testing.T) {
 	expected := reflect.TypeOf(&urlTarget{})
 
 	for it.Next(false) {
-		typ := reflect.TypeOf(it.Value())
+		v, _ := it.Value()
+		typ := reflect.TypeOf(v)
 		if typ != expected {
 			t.Errorf("Expected %v but got %v", expected, typ)
 		}

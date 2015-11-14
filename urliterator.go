@@ -57,10 +57,10 @@ func (it *urlIterator) Next(continuous bool) bool {
 	it.position++
 	return true
 }
-func (it *urlIterator) Value() Target {
+func (it *urlIterator) Value() (Target, error) {
 	// Why position-1?  Because the initial value will be 0, the first call to
 	// next will increment to 1 but we wont have got the value from position 0
 	// at that point.
 	retVal := urlTarget{method: "GET", url: it.urls[it.position-1]}
-	return &retVal
+	return &retVal, nil
 }

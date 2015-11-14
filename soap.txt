@@ -2,7 +2,7 @@
 <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
   <soap:Body>
     <GetGeoIP xmlns="http://www.webservicex.net/">
-      <IPAddress>81.107.183.239</IPAddress>
+        <IPAddress>{{.ip}}</IPAddress>
     </GetGeoIP>
   </soap:Body>
 </soap:Envelope>

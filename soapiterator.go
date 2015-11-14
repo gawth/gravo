@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"net/http"
 	"text/template"
 )
 
@@ -43,6 +44,8 @@ func (it *soapIterator) Value() (Target, error) {
 		}
 	}
 
-	retVal := urlTarget{method: "POST", url: it.url, body: body.String()}
+	h := http.Header{}
+	h.Add("Content-Type", "text/xml; charset=utf-8")
+	retVal := urlTarget{method: "POST", url: it.url, headers: h, body: body.String()}
 	return &retVal, nil
 }

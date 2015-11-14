@@ -1,4 +1,3 @@
-4a. Need to add a new method to soap iterator that includes a check on whether slices are correct length
 5. Plumb interfaces for SOAP handling
 5a. Write tests for iterator
 5b. Update config (and tests) to correctly load and parse the template
@@ -12,6 +11,7 @@
 
 
 DONE
+4a. Need to add a new method to soap iterator that includes a check on whether slices are correct length - commit e44c4c1d607cf26f7ddb95223c16f0886a9a3e65
 3. Finish off support for URL file
 1. Try a soap endpoint
 2. Extend for different http verbs
