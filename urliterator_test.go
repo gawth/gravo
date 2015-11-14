@@ -1,4 +1,4 @@
-package gravo
+package main
 
 import (
 	"bytes"

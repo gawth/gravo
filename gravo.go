@@ -1,4 +1,4 @@
-package gravo
+package main
 
 import (
 	"bytes"
@@ -143,7 +143,10 @@ func main() {
 	fmt.Printf("Config: %v\n", c)
 
 	if c.Soap {
-		doSoap(c)
+		// TODO: Need to get columns and data from config
+		iterator := soapIterator{url: c.Target.urls[0], columns: c.columns, data: c.data, template: c.soapTemplate}
+		runLoad(c, &iterator, &timer{}, &standardOutput{})
+		//doSoap(c)
 	} else {
 		logInfo(c, fmt.Sprintf("Number of URLs is :%v\n", len(c.Target.urls)))
 		iterator := urlIterator{urls: c.Target.urls}
