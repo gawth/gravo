@@ -14,8 +14,9 @@ import (
 
 var configFile = "gravo.yml"
 
+// deleteBlanks is a simple function to remove blank lines from an array of strings
+// Used to tidy up URL file input
 func deleteBlanks(s []string) []string {
-	//TODO Need a test for this!
 	var r []string
 	for _, str := range s {
 		if str != "" {
@@ -25,6 +26,7 @@ func deleteBlanks(s []string) []string {
 	return r
 }
 
+// getUrls reads URLS from a file, removes blank lines and then returns.
 var getUrls = func(filename string) ([]string, error) {
 	content, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -45,26 +47,20 @@ func (t *target) ConstructURL() string {
 	return "http://" + t.Host + ":" + t.Port + "/" + t.Path
 }
 
-func (t *target) LoadUrls() {
+// loadUrls initialises the URLs on the config either with URLs from a file
+// if available OR by using the config data provided.
+func (t *target) loadUrls() {
 
 	// If we're not using a file then just construct the URL
 	if t.File == "" {
 		t.urls = []string{t.ConstructURL()}
+		return
 
 	}
 	// If we've not get any URLs try and get from fie
 	if t.urls == nil {
 		t.urls, _ = getUrls(t.File)
 	}
-}
-func (t *target) URL(index int) (string, error) {
-	if len(t.urls) == 0 {
-		return t.ConstructURL(), nil
-	}
-	if index >= len(t.urls) {
-		return "", fmt.Errorf("Attempted to get URL at %d from URLs length %d", index, len(t.urls))
-	}
-	return t.urls[index], nil
 }
 
 type runrate struct {
@@ -82,17 +78,6 @@ type config struct {
 	columns      []string
 	data         [][]string
 	soapTemplate *template.Template
-}
-
-func (c *config) RequestCount() int {
-	// If requests has been set to > 0 then assume we're dealing with a single repeated
-	// request to a url for now.  Later on we might get a bit more complicated and use
-	// combo of requests and file URLs
-	//
-	if c.Requests != 0 {
-		return c.Requests
-	}
-	return len(c.Target.urls)
 }
 
 func readConfigFile(file string) []byte {
@@ -125,7 +110,7 @@ func loadTemplate(filename string) (*template.Template, error) {
 
 func initialiseConfig(file string) config {
 	c := convertYaml(readConfigFile(file))
-	c.Target.LoadUrls()
+	c.Target.loadUrls()
 
 	if c.Soap {
 		tmp, err := loadTemplate(c.SoapFile)

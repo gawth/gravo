@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"sync"
@@ -46,12 +47,16 @@ func (tg *stubTarget) Hit(tracker *sync.WaitGroup, t Timer, h OutputHandler) {
 }
 
 type stubIterator struct {
-	current int
-	finish  int
-	target  Target
+	current  int
+	finish   int
+	target   Target
+	valError bool
 }
 
 func (s stubIterator) Value() (Target, error) {
+	if s.valError {
+		return nil, errors.New("This is an error")
+	}
 	return s.target, nil
 }
 func (s *stubIterator) Next(forever bool) bool {
@@ -75,6 +80,22 @@ func TestRunLoad(t *testing.T) {
 	runLoad(c, &it, &timer, &outer)
 	if tmp.hits != it.finish {
 		t.Errorf("Expected %d hits but got %d", it.finish, tmp.hits)
+	}
+
+}
+func TestRunLoadWithErrorFromNext(t *testing.T) {
+
+	tmp := stubTarget{hits: 0}
+	timer := stubTimer{}
+	outer := stubOutput{}
+
+	it := stubIterator{current: 0, finish: 2, target: &tmp, valError: true}
+
+	c := config{Verbose: true, Target: target{Host: "testhost", Port: "1234", Path: "path"}, Requests: 2, Rate: runrate{Rrate: 1, Rtype: "m"}}
+
+	runLoad(c, &it, &timer, &outer)
+	if tmp.hits != 0 {
+		t.Errorf("Expected %d hits but got %d", 0, tmp.hits)
 	}
 
 }

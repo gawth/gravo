@@ -1,11 +1,12 @@
 6. Code review to get rid of any dodgy bits
-6a. Run golang tools to validate code
 6b. Code coverage and update tests where appropriate
-6c. Rename package and review file structures
-6d. Clean out junk from gravo
+6c. Review file structures
+7. Need usable output from running gravo
 
 
 DONE
+6a. Run golang tools to validate code - 9c8efb5b0eff06793b99445ab262da9e097dc820
+6d. Clean out junk from gravo - 9c8efb5b0eff06793b99445ab262da9e097dc820
 5. Plumb interfaces for SOAP handling
 5a. Write tests for iterator
 5b. Update config (and tests) to correctly load and parse the template
