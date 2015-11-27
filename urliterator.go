@@ -7,7 +7,7 @@ import (
 	"sync"
 )
 
-var hitUrl = func(method string, url string, body string, headers http.Header) (resp *http.Response, err error) {
+var hitURL = func(method string, url string, body string, headers http.Header) (resp *http.Response, err error) {
 	client := &http.Client{}
 
 	req, err := http.NewRequest(method, url, bytes.NewBufferString(body))
@@ -31,7 +31,7 @@ func (tg *urlTarget) Hit(tracker *sync.WaitGroup, t Timer, h OutputHandler) {
 	t.Start()
 
 	//log.Println(fmt.Sprintf("Hitting URL %v\n", tg.url))
-	res, err := hitUrl(tg.method, tg.url, tg.body, tg.headers)
+	res, err := hitURL(tg.method, tg.url, tg.body, tg.headers)
 	t.End()
 
 	if err != nil {

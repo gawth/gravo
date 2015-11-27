@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"encoding/csv"
-	"errors"
 	"fmt"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
@@ -63,7 +62,7 @@ func (t *target) URL(index int) (string, error) {
 		return t.ConstructURL(), nil
 	}
 	if index >= len(t.urls) {
-		return "", errors.New(fmt.Sprintf("Attempted to get URL at %d from URLs length %d", index, len(t.urls)))
+		return "", fmt.Errorf("Attempted to get URL at %d from URLs length %d", index, len(t.urls))
 	}
 	return t.urls[index], nil
 }
@@ -99,7 +98,7 @@ func (c *config) RequestCount() int {
 func readConfigFile(file string) []byte {
 	f, err := ioutil.ReadFile(file)
 	if err != nil {
-		log.Fatal("error: %v", err)
+		log.Fatal(err)
 	}
 	return f
 }
@@ -109,7 +108,7 @@ func convertYaml(raw []byte) config {
 
 	err := yaml.Unmarshal(raw, &c)
 	if err != nil {
-		log.Fatal("error: %v", err)
+		log.Fatal(err)
 	}
 	return c
 }
@@ -124,7 +123,7 @@ func loadTemplate(filename string) (*template.Template, error) {
 	return t, nil
 }
 
-func InitialiseConfig(file string) config {
+func initialiseConfig(file string) config {
 	c := convertYaml(readConfigFile(file))
 	c.Target.LoadUrls()
 

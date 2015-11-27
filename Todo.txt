@@ -1,8 +1,3 @@
-5. Plumb interfaces for SOAP handling
-5a. Write tests for iterator
-5b. Update config (and tests) to correctly load and parse the template
-5c. Construct the soap iterator with the template from the config
-5d. Call the soap iterator
 6. Code review to get rid of any dodgy bits
 6a. Run golang tools to validate code
 6b. Code coverage and update tests where appropriate
@@ -11,6 +6,11 @@
 
 
 DONE
+5. Plumb interfaces for SOAP handling
+5a. Write tests for iterator
+5b. Update config (and tests) to correctly load and parse the template
+5c. Construct the soap iterator with the template from the config
+5d. Call the soap iterator
 4a. Need to add a new method to soap iterator that includes a check on whether slices are correct length - commit e44c4c1d607cf26f7ddb95223c16f0886a9a3e65
 3. Finish off support for URL file
 1. Try a soap endpoint

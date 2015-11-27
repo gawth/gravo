@@ -1,13 +1,10 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"io"
-	"net/http"
 	"sync"
 	"testing"
-	"text/template"
 	"time"
 )
 
@@ -16,28 +13,6 @@ type nopCloser struct {
 }
 
 func (nopCloser) Close() error { return nil }
-
-func TestSoap(t *testing.T) {
-	var expected = "http://testhost:1234/path"
-	var actual = ""
-
-	callTarget = func(target string, method string, header http.Header, body string) (resp *http.Response, err error) {
-		actual = target
-
-		var response http.Response
-		response.Body = nopCloser{bytes.NewBufferString("test data")}
-		return &response, nil
-	}
-
-	st, _ := template.New("tempy").Parse("")
-
-	c := config{Soap: true, soapTemplate: st, Target: target{Host: "testhost", Port: "1234", Path: "path"}, Rate: runrate{Rrate: 5, Rtype: "S"}}
-	doSoap(c)
-
-	if expected != actual {
-		t.Errorf("Expected '%s' but got '%s'", expected, actual)
-	}
-}
 
 func TestGetTimeUnit(t *testing.T) {
 	cases := []struct {
@@ -66,7 +41,7 @@ type stubTarget struct {
 func (tg *stubTarget) Hit(tracker *sync.WaitGroup, t Timer, h OutputHandler) {
 	defer tracker.Done()
 	tg.hits++
-	fmt.Println("Hit %d", tg.hits)
+	fmt.Printf("Hit %d\n", tg.hits)
 	return
 }
 

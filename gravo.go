@@ -1,10 +1,7 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
-	"io/ioutil"
-	"log"
 	"net/http"
 	"sync"
 	"time"
@@ -54,17 +51,6 @@ func getTimeUnit(unit string) time.Duration {
 	}
 }
 
-var callTarget = func(target string, method string, headers http.Header, body string) (resp *http.Response, err error) {
-	client := &http.Client{}
-
-	req, err := http.NewRequest(method, target, bytes.NewBufferString(body))
-	if err != nil {
-		return nil, err
-	}
-	req.Header = headers
-	return client.Do(req)
-}
-
 // runLoad takes config and an iterator.  It uses the iterator to repeatedly
 // call the hit method on the value returned by the iterator.  The frequency of
 // the calls is based on the Rate defined in the config.
@@ -105,53 +91,14 @@ func runLoad(c config, i Iterator, ti Timer, o OutputHandler) {
 
 }
 
-func doSoap(c config) {
-	h := http.Header{}
-	h.Add("Host", c.Target.Host)
-	h.Add("Content-Type", "text/xml; charset=utf-8")
-
-	m := make(map[string]string)
-	m["ip"] = "9999"
-
-	var body bytes.Buffer
-	err := c.soapTemplate.Execute(&body, m)
-	if err != nil {
-		log.Fatal("error: %v", err)
-	}
-
-	h.Add("Content-Length", string(len(body.String())))
-
-	url, err := c.Target.URL(0)
-	if err != nil {
-		log.Fatal("error: %v", err)
-	}
-
-	resp, err := callTarget(url, "POST", h, body.String())
-
-	if err != nil {
-		log.Println(err)
-	}
-
-	b, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatal("error: %v", err)
-	}
-
-	in := string(b)
-	log.Println(in)
-
-}
-
 func main() {
 
-	c := InitialiseConfig("gravo.yml")
+	c := initialiseConfig("gravo.yml")
 	fmt.Printf("Config: %v\n", c)
 
 	if c.Soap {
-		// TODO: Need to get columns and data from config
 		iterator := soapIterator{url: c.Target.urls[0], columns: c.columns, data: c.data, template: c.soapTemplate}
 		runLoad(c, &iterator, &timer{}, &standardOutput{})
-		//doSoap(c)
 	} else {
 		logInfo(c, fmt.Sprintf("Number of URLs is :%v\n", len(c.Target.urls)))
 		iterator := urlIterator{urls: c.Target.urls}

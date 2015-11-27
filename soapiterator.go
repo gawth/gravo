@@ -40,7 +40,7 @@ func (it *soapIterator) Value() (Target, error) {
 
 		err := it.template.Execute(&body, tmpMap)
 		if err != nil {
-			log.Fatal("error: %v", err)
+			log.Fatal(err)
 		}
 	}
 

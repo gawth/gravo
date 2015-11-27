@@ -43,7 +43,7 @@ func (t *stubTimer) GetTime() time.Duration {
 
 func TestUrlHit(t *testing.T) {
 	var called = false
-	var expectedUrl = "a url"
+	var expectedURL = "a url"
 	var expectedMethod = "a method"
 	var expectedBody = "a body"
 	var expectedHeaders = map[string][]string{}
@@ -55,7 +55,7 @@ func TestUrlHit(t *testing.T) {
 	timer := stubTimer{}
 	outer := stubOutput{testdata, nil}
 
-	hitUrl = func(method string, url string, body string, headers http.Header) (resp *http.Response, err error) {
+	hitURL = func(method string, url string, body string, headers http.Header) (resp *http.Response, err error) {
 		var response http.Response
 		response.Body = nopCloser{expectedRes}
 
@@ -63,7 +63,7 @@ func TestUrlHit(t *testing.T) {
 		return &response, nil
 	}
 
-	target := urlTarget{method: expectedMethod, url: expectedUrl, body: expectedBody, headers: expectedHeaders}
+	target := urlTarget{method: expectedMethod, url: expectedURL, body: expectedBody, headers: expectedHeaders}
 
 	tracker.Add(1)
 	target.Hit(tracker, &timer, &outer)
