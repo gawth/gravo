@@ -1,7 +1,9 @@
 6. Code review to get rid of any dodgy bits
 6b. Code coverage and update tests where appropriate
 6c. Review file structures
+6d. Consider getting rid of any globals, e.g. hitURL
 7. Need usable output from running gravo
+8. Allow addition of a validator - eval a user specified regex on the output
 
 
 DONE

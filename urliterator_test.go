@@ -15,11 +15,18 @@ type stubOutput struct {
 	actualBody   []byte
 }
 
-func (so *stubOutput) DealWithIt(r http.Response) {
+func (so *stubOutput) DealWithIt(r http.Response, t Timer) {
 	so.actualBody, _ = ioutil.ReadAll(r.Body)
 	r.Body.Close()
 
 	return
+}
+
+func (so *stubOutput) LogInfo(s string) {
+
+}
+func (so *stubOutput) Start() {
+
 }
 
 type stubTimer struct {

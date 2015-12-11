@@ -16,7 +16,9 @@ type Timer interface {
 
 //OutputHandler takes the output from the service request and deals with it
 type OutputHandler interface {
-	DealWithIt(http.Response)
+	DealWithIt(http.Response, Timer)
+	LogInfo(string)
+	Start()
 }
 
 // Target provides an interface for which the hit method will be called
@@ -31,11 +33,6 @@ type Iterator interface {
 	Value() (Target, error)
 }
 
-func logInfo(c config, s string) {
-	if c.Verbose {
-		fmt.Printf(s)
-	}
-}
 func getTimeUnit(unit string) time.Duration {
 	switch unit {
 	case "s":
@@ -60,19 +57,20 @@ func getTimeUnit(unit string) time.Duration {
 func runLoad(c config, i Iterator, ti Timer, o OutputHandler) {
 	var waitfor = time.Duration(c.Rate.Rrate) * getTimeUnit(c.Rate.Rtype)
 
-	logInfo(c, fmt.Sprintf("Interval %d\n", waitfor))
+	o.LogInfo(fmt.Sprintf("Interval %d\n", waitfor))
 	ticker := time.NewTicker(waitfor)
 	done := make(chan bool)
 
 	tracker := &sync.WaitGroup{}
 
+	o.Start()
 	go func(done chan bool) {
 		for t := range ticker.C {
-			logInfo(c, fmt.Sprintf("Tickt at %s\n", t))
+			o.LogInfo(fmt.Sprintf("Tickt at %s\n", t))
 			if i.Next(false) {
 				v, err := i.Value()
 				if err != nil {
-					logInfo(c, fmt.Sprintf("Error from iterator value so skipping this value :%s\n", err))
+					o.LogInfo(fmt.Sprintf("Error from iterator value so skipping this value :%s\n", err))
 					continue
 				}
 				tracker.Add(1)
@@ -87,22 +85,19 @@ func runLoad(c config, i Iterator, ti Timer, o OutputHandler) {
 
 	<-done
 	tracker.Wait()
-	logInfo(c, fmt.Sprintf("Done!!\n"))
+	o.LogInfo(fmt.Sprintf("Done!!\n"))
 
 }
 
 func main() {
 
 	c := initialiseConfig("gravo.yml")
-	fmt.Printf("Config: %v\n", c)
-
 	if c.Soap {
 		iterator := soapIterator{url: c.Target.urls[0], columns: c.columns, data: c.data, template: c.soapTemplate}
-		runLoad(c, &iterator, &timer{}, &standardOutput{})
+		runLoad(c, &iterator, &timer{}, &standardOutput{c.Verbose})
 	} else {
-		logInfo(c, fmt.Sprintf("Number of URLs is :%v\n", len(c.Target.urls)))
 		iterator := urlIterator{urls: c.Target.urls}
-		runLoad(c, &iterator, &timer{}, &standardOutput{})
+		runLoad(c, &iterator, &timer{}, &standardOutput{c.Verbose})
 	}
 
 }

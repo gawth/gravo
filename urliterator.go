@@ -30,7 +30,6 @@ func (tg *urlTarget) Hit(tracker *sync.WaitGroup, t Timer, h OutputHandler) {
 	defer tracker.Done()
 	t.Start()
 
-	//log.Println(fmt.Sprintf("Hitting URL %v\n", tg.url))
 	res, err := hitURL(tg.method, tg.url, tg.body, tg.headers)
 	t.End()
 
@@ -39,8 +38,7 @@ func (tg *urlTarget) Hit(tracker *sync.WaitGroup, t Timer, h OutputHandler) {
 		return
 	}
 
-	h.DealWithIt(*res)
-	//log.Println(fmt.Sprintf("Call took %v\n", t.GetTime()))
+	h.DealWithIt(*res, t)
 	return
 
 }
@@ -60,7 +58,7 @@ func (it *urlIterator) Next(continuous bool) bool {
 func (it *urlIterator) Value() (Target, error) {
 	// Why position-1?  Because the initial value will be 0, the first call to
 	// next will increment to 1 but we wont have got the value from position 0
-	// at that point.
+	// at that point.  Could save off the val in Next and just return it here...
 	retVal := urlTarget{method: "GET", url: it.urls[it.position-1]}
 	return &retVal, nil
 }

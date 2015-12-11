@@ -7,7 +7,7 @@ rate:
     rrate: 1
     rtype: s
 
-verbose: true
+verbose: false
 soap: true
 soapfile: soap.txt
 soapdatafile: data.txt

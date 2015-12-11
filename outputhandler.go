@@ -5,21 +5,33 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 )
 
 type standardOutput struct {
+	Verbose bool
 }
 
-func (so *standardOutput) DealWithIt(r http.Response) {
-	//TODO Should return this lot and do it externally
+func (so *standardOutput) DealWithIt(r http.Response, t Timer) {
 	payload, err := ioutil.ReadAll(r.Body)
 	r.Body.Close()
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	//TODO should be timing this as well...again, do it outside of the hit call...
-	log.Println(fmt.Sprintf("Got %d bytes, %d meg\n", len(payload), len(payload)/1024/1024))
-	log.Println(string(payload))
+	log.Println(fmt.Sprintf(",%d,%d,%v\n", len(payload), len(payload)/1024/1024, t.GetTime()))
+	if so.Verbose {
+		fmt.Fprintln(os.Stderr, string(payload))
+	}
 	return
+}
+
+func (so *standardOutput) LogInfo(s string) {
+	if so.Verbose {
+		fmt.Fprintln(os.Stderr, s)
+	}
+}
+
+func (so *standardOutput) Start() {
+	fmt.Println("timestamp,bytes, meg, duration")
 }
