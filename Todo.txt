@@ -4,6 +4,10 @@
 6d. Consider getting rid of any globals, e.g. hitURL
 7. Need usable output from running gravo
 8. Allow addition of a validator - eval a user specified regex on the output
+9. Support for http verbs other than GET - See VERBS section below..
+9a. Get rid of references to soap as its actually related to the likes of post
+10. Need some validation in config to ensure various interdependent config items are put together
+
 
 
 DONE
@@ -19,3 +23,14 @@ DONE
 1. Try a soap endpoint
 2. Extend for different http verbs
 4. Plumb interfaces for URL handling
+
+
+VERBS
+Currently support GET and POST.  For POST I assume its soap related with a single URL.  For GET its multiple URLs...
+Can we shift to a mode where we infer what behaviour is required.  The config specifies the verb.  Then iterate over both the URLs and the data...
+What to do when one of them runs out?  Does a single URL imply repeatedly calling that URL?
+Currently for SOAP we construct the URL from the config.
+
+For now the simplest thing is to rename SOAP and extend to support any verb.  Same for URL.
+Can then use the "SOAP" flag to determine behaviour...
+

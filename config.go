@@ -72,12 +72,11 @@ type config struct {
 	Requests     int
 	Rate         runrate
 	Verbose      bool
-	Soap         bool
-	SoapFile     string
-	SoapDataFile string
+	TemplateFile string
+	DataFile     string
 	columns      []string
 	data         [][]string
-	soapTemplate *template.Template
+	template     *template.Template
 }
 
 func readConfigFile(file string) []byte {
@@ -112,26 +111,26 @@ func initialiseConfig(file string) config {
 	c := convertYaml(readConfigFile(file))
 	c.Target.loadUrls()
 
-	if c.Soap {
-		tmp, err := loadTemplate(c.SoapFile)
+	if len(c.DataFile) > 0 {
+		tmp, err := loadTemplate(c.TemplateFile)
 		if err != nil {
-			log.Fatal(fmt.Sprintf("Config: Unable to load SOAP template %v err: %v", file, err))
+			log.Fatal(fmt.Sprintf("Config: Unable to load template %v err: %v", file, err))
 		}
-		c.soapTemplate = tmp
+		c.template = tmp
 
 		//TODO Need to clean this up
-		f, err := os.Open(c.SoapDataFile)
+		f, err := os.Open(c.DataFile)
 		if err != nil {
-			log.Fatal(fmt.Sprintf("Config: Unable to open soap data file (%v): %v", c.SoapDataFile, err))
+			log.Fatal(fmt.Sprintf("Config: Unable to open data file (%v): %v", c.DataFile, err))
 		}
 		reader := csv.NewReader(bufio.NewReader(f))
 
 		raw, err := reader.ReadAll()
 		if err != nil {
-			log.Fatal(fmt.Sprintf("Config: Unable to read soap data file (%v): %v", c.SoapDataFile, err))
+			log.Fatal(fmt.Sprintf("Config: Unable to read data file (%v): %v", c.DataFile, err))
 		}
 		if len(raw) < 2 {
-			log.Fatal(fmt.Sprintf("Config: Too few lines (%v) in SOAP data file", len(raw)))
+			log.Fatal(fmt.Sprintf("Config: Too few lines (%v) in data file", len(raw)))
 		}
 		// First row "should" contain headers (how to check?)
 		c.columns = raw[0]

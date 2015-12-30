@@ -9,5 +9,5 @@ rate:
 
 verbose: false
 soap: true
-soapfile: soap.txt
-soapdatafile: data.txt
+templatefile: soap.txt
+datafile: data.txt

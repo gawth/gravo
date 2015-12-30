@@ -8,7 +8,7 @@ import (
 	"text/template"
 )
 
-type soapIterator struct {
+type dataIterator struct {
 	url      string
 	columns  []string
 	data     [][]string
@@ -16,18 +16,18 @@ type soapIterator struct {
 	position int
 }
 
-func (it *soapIterator) Next(continuous bool) bool {
+func (it *dataIterator) Next(continuous bool) bool {
 	if it.position >= len(it.data) {
 		return false
 	}
 	it.position++
 	return true
 }
-func (it *soapIterator) Value() (Target, error) {
+func (it *dataIterator) Value() (Target, error) {
 	var body bytes.Buffer
 
 	if len(it.data[it.position-1]) != len(it.columns) {
-		return &urlTarget{}, fmt.Errorf("soapIterator: Incorrect number of data items line %v.  Expected %v but got %v", it.position-1, len(it.columns), len(it.data[it.position-1]))
+		return &urlTarget{}, fmt.Errorf("dataIterator: Incorrect number of data items line %v.  Expected %v but got %v", it.position-1, len(it.columns), len(it.data[it.position-1]))
 	}
 	if it.template != nil {
 

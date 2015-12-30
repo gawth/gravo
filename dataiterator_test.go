@@ -6,7 +6,7 @@ import (
 	"text/template"
 )
 
-func TestSoapIterator(t *testing.T) {
+func TestDataIterator(t *testing.T) {
 	var col1 = "c1"
 	var col2 = "c2"
 	var col3 = "c3"
@@ -19,7 +19,7 @@ func TestSoapIterator(t *testing.T) {
 		"data3",
 	}}
 
-	var it = soapIterator{url: testurl, columns: testcols, data: td}
+	var it = dataIterator{url: testurl, columns: testcols, data: td}
 	var called = 0
 
 	expected := reflect.TypeOf(&urlTarget{})
@@ -28,7 +28,7 @@ func TestSoapIterator(t *testing.T) {
 		val, _ := it.Value()
 		typ := reflect.TypeOf(val)
 		if typ != expected {
-			t.Errorf("TestSoapIterator: Expected %v but got %v", expected, typ)
+			t.Errorf("TestDataIterator: Expected %v but got %v", expected, typ)
 		}
 		called++
 
@@ -38,15 +38,15 @@ func TestSoapIterator(t *testing.T) {
 		//
 		var concreteTarget = reflect.ValueOf(val).Interface().(*urlTarget)
 		if concreteTarget.url != testurl {
-			t.Errorf("TestSoapterator: Expected url %v but got %v", testurl, concreteTarget.url)
+			t.Errorf("Testdataterator: Expected url %v but got %v", testurl, concreteTarget.url)
 		}
 	}
 	if called != len(td) {
-		t.Errorf("TestSoapterator: Expected next %v times but got %v", len(td), called)
+		t.Errorf("Testdataterator: Expected next %v times but got %v", len(td), called)
 	}
 }
 
-func TestSoapTemplate(t *testing.T) {
+func TestdataTemplate(t *testing.T) {
 	var col1 = "c1"
 	var col2 = "c2"
 	var col3 = "c3"
@@ -71,10 +71,10 @@ func TestSoapTemplate(t *testing.T) {
 
 	tmpl, err := template.New("test").Parse(tmpText)
 	if err != nil {
-		t.Errorf("TestSoapTemplate: Failed to parse the test template:%v", err)
+		t.Errorf("TestdataTemplate: Failed to parse the test template:%v", err)
 	}
 
-	var it = soapIterator{url: testurl, columns: testcols, data: td, template: tmpl}
+	var it = dataIterator{url: testurl, columns: testcols, data: td, template: tmpl}
 	var called = 0
 
 	for it.Next(false) {
@@ -84,15 +84,15 @@ func TestSoapTemplate(t *testing.T) {
 
 		var concreteTarget = reflect.ValueOf(val).Interface().(*urlTarget)
 		if concreteTarget.body != expectedBody {
-			t.Errorf("TestSoapTemplate: Incorrect body '%v'", concreteTarget.body)
+			t.Errorf("TestDataTemplate: Incorrect body '%v'", concreteTarget.body)
 		}
 	}
 	if called != len(td) {
-		t.Errorf("TestSoapTemplate: Expected next %v times but got %v", len(td), called)
+		t.Errorf("TestdataTemplate: Expected next %v times but got %v", len(td), called)
 	}
 }
 
-func TestErrorCreatingSoapTemplate(t *testing.T) {
+func TestErrorCreatingdataTemplate(t *testing.T) {
 	var col1 = "c1"
 	var col2 = "c2"
 	var col3 = "c3"
@@ -108,14 +108,14 @@ func TestErrorCreatingSoapTemplate(t *testing.T) {
 
 	tmpl, err := template.New("test").Parse("")
 	if err != nil {
-		t.Errorf("TestErrorCreatingSoapTemplate: Failed to parse the test template:%v", err)
+		t.Errorf("TestErrorCreatingdataTemplate: Failed to parse the test template:%v", err)
 	}
 
-	var it = soapIterator{url: testurl, columns: testcols, data: dataError, template: tmpl}
+	var it = dataIterator{url: testurl, columns: testcols, data: dataError, template: tmpl}
 	for it.Next(false) {
 		_, err := it.Value()
 		if err == nil {
-			t.Errorf("TestErrorCreatingSoapTemplate: Expected an error but didn't get one")
+			t.Errorf("TestErrorCreatingdataTemplate: Expected an error but didn't get one")
 		}
 
 	}

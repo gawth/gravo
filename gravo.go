@@ -92,8 +92,8 @@ func runLoad(c config, i Iterator, ti Timer, o OutputHandler) {
 func main() {
 
 	c := initialiseConfig("gravo.yml")
-	if c.Soap {
-		iterator := soapIterator{url: c.Target.urls[0], columns: c.columns, data: c.data, template: c.soapTemplate}
+	if len(c.DataFile) > 0 {
+		iterator := dataIterator{url: c.Target.urls[0], columns: c.columns, data: c.data, template: c.template}
 		runLoad(c, &iterator, &timer{}, &standardOutput{c.Verbose})
 	} else {
 		iterator := urlIterator{urls: c.Target.urls}
