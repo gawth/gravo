@@ -11,3 +11,4 @@ verbose: false
 soap: true
 templatefile: soap.txt
 datafile: data.txt
+verb: POST

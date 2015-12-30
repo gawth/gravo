@@ -74,6 +74,7 @@ type config struct {
 	Verbose      bool
 	TemplateFile string
 	DataFile     string
+	Verb         string
 	columns      []string
 	data         [][]string
 	template     *template.Template

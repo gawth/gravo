@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"sync"
 	"testing"
@@ -42,7 +41,6 @@ type stubTarget struct {
 func (tg *stubTarget) Hit(tracker *sync.WaitGroup, t Timer, h OutputHandler) {
 	defer tracker.Done()
 	tg.hits++
-	fmt.Printf("Hit %d\n", tg.hits)
 	return
 }
 

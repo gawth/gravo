@@ -14,6 +14,7 @@ type dataIterator struct {
 	data     [][]string
 	template *template.Template
 	position int
+	verb     string
 }
 
 func (it *dataIterator) Next(continuous bool) bool {
@@ -46,6 +47,6 @@ func (it *dataIterator) Value() (Target, error) {
 
 	h := http.Header{}
 	h.Add("Content-Type", "text/xml; charset=utf-8")
-	retVal := urlTarget{method: "POST", url: it.url, headers: h, body: body.String()}
+	retVal := urlTarget{method: it.verb, url: it.url, headers: h, body: body.String()}
 	return &retVal, nil
 }

@@ -91,12 +91,12 @@ func runLoad(c config, i Iterator, ti Timer, o OutputHandler) {
 
 func main() {
 
-	c := initialiseConfig("gravo.yml")
+	c := initialiseConfig("config.yml")
 	if len(c.DataFile) > 0 {
-		iterator := dataIterator{url: c.Target.urls[0], columns: c.columns, data: c.data, template: c.template}
+		iterator := dataIterator{url: c.Target.urls[0], columns: c.columns, data: c.data, template: c.template, verb: c.Verb}
 		runLoad(c, &iterator, &timer{}, &standardOutput{c.Verbose})
 	} else {
-		iterator := urlIterator{urls: c.Target.urls}
+		iterator := urlIterator{urls: c.Target.urls, verb: c.Verb}
 		runLoad(c, &iterator, &timer{}, &standardOutput{c.Verbose})
 	}
 
