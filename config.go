@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"regexp"
 	"strings"
 	"text/template"
 )
@@ -75,9 +76,11 @@ type config struct {
 	TemplateFile string
 	DataFile     string
 	Verb         string
+	Regex        string
 	columns      []string
 	data         [][]string
 	template     *template.Template
+	validator    *regexp.Regexp
 }
 
 func readConfigFile(file string) []byte {
@@ -111,6 +114,11 @@ func loadTemplate(filename string) (*template.Template, error) {
 func initialiseConfig(file string) config {
 	c := convertYaml(readConfigFile(file))
 	c.Target.loadUrls()
+
+	if len(c.Regex) > 0 {
+		// Compile and save the regex from the config
+		c.validator = regexp.MustCompile(c.Regex)
+	}
 
 	if len(c.DataFile) > 0 {
 		tmp, err := loadTemplate(c.TemplateFile)

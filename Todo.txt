@@ -3,13 +3,13 @@
 6c. Review file structures
 6d. Consider getting rid of any globals, e.g. hitURL
 7. Need usable output from running gravo
-8. Allow addition of a validator - eval a user specified regex on the output
 10. Need some validation in config to ensure various interdependent config items are put together - possibly include some sensible defaults
-11. Extend verbose to dump out return from service calls
 
 
 
 DONE
+8. Allow addition of a validator - eval a user specified regex on the output
+11. Extend verbose to dump out return from service calls - already a feature!
 9b. Support for http verbs other than GET - See VERBS section below..a35d2fdcfbd57269e75aae596be545a9b190ba3c
 9a. Get rid of references to soap as its actually related to the likes of post - 7cab1abd4292b7cdceedb12177d4c1a8aba4c5d8
 6a. Run golang tools to validate code - 9c8efb5b0eff06793b99445ab262da9e097dc820

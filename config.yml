@@ -12,3 +12,4 @@ soap: true
 templatefile: soap.txt
 datafile: data.txt
 verb: POST
+regex: <IP>

@@ -14,6 +14,11 @@ type Timer interface {
 	GetTime() time.Duration
 }
 
+// Validator is used to check the output of the call to the target is valid
+type Validator interface {
+	IsValid([]byte) bool
+}
+
 //OutputHandler takes the output from the service request and deals with it
 type OutputHandler interface {
 	DealWithIt(http.Response, Timer)
@@ -92,12 +97,21 @@ func runLoad(c config, i Iterator, ti Timer, o OutputHandler) {
 func main() {
 
 	c := initialiseConfig("config.yml")
+
+	var validator Validator
+	var output standardOutput
+	if len(c.Regex) > 0 {
+		validator = &regexValidator{c.validator}
+		output = standardOutput{c.Verbose, validator}
+	} else {
+		output = standardOutput{Verbose: c.Verbose}
+	}
 	if len(c.DataFile) > 0 {
 		iterator := dataIterator{url: c.Target.urls[0], columns: c.columns, data: c.data, template: c.template, verb: c.Verb}
-		runLoad(c, &iterator, &timer{}, &standardOutput{c.Verbose})
+		runLoad(c, &iterator, &timer{}, &output)
 	} else {
 		iterator := urlIterator{urls: c.Target.urls, verb: c.Verb}
-		runLoad(c, &iterator, &timer{}, &standardOutput{c.Verbose})
+		runLoad(c, &iterator, &timer{}, &output)
 	}
 
 }
