@@ -33,6 +33,8 @@ func (tg *urlTarget) Hit(tracker *sync.WaitGroup, t Timer, h OutputHandler) {
 	res, err := hitURL(tg.method, tg.url, tg.body, tg.headers)
 	t.End()
 
+	log.Println("Just hit", tg.method, tg.url, tg.body, tg.headers)
+
 	if err != nil {
 		log.Println(err)
 		return

@@ -1,15 +1,16 @@
 target:
-    host: www.webservicex.net
-    port: 80
-    path: geoipservice.asmx
+    host: localhost
+    port: 8080
+    path: v3/retrieveByHotelId
 
 rate:
     rrate: 1
     rtype: s
 
-verbose: false
-soap: true
-templatefile: soap.txt
-datafile: data.txt
+verbose: true
+templatefile: pdt.txt
+datafile: pd.txt
 verb: POST
-regex: <IP>
+regex: HotelId
+headers:
+    Content-Type: [application/x-www-form-urlencoded]

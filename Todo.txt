@@ -4,7 +4,8 @@
 6d. Consider getting rid of any globals, e.g. hitURL
 7. Need usable output from running gravo
 10. Need some validation in config to ensure various interdependent config items are put together - possibly include some sensible defaults
-
+12. Need to allow command line options - especially for which config file to use
+13.
 
 
 DONE

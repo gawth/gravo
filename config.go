@@ -7,6 +7,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"regexp"
 	"strings"
@@ -81,6 +82,7 @@ type config struct {
 	data         [][]string
 	template     *template.Template
 	validator    *regexp.Regexp
+	Headers      http.Header
 }
 
 func readConfigFile(file string) []byte {

@@ -107,7 +107,7 @@ func main() {
 		output = standardOutput{Verbose: c.Verbose}
 	}
 	if len(c.DataFile) > 0 {
-		iterator := dataIterator{url: c.Target.urls[0], columns: c.columns, data: c.data, template: c.template, verb: c.Verb}
+		iterator := dataIterator{url: c.Target.urls[0], columns: c.columns, data: c.data, template: c.template, verb: c.Verb, headers: c.Headers}
 		runLoad(c, &iterator, &timer{}, &output)
 	} else {
 		iterator := urlIterator{urls: c.Target.urls, verb: c.Verb}

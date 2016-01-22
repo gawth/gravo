@@ -15,6 +15,7 @@ type dataIterator struct {
 	template *template.Template
 	position int
 	verb     string
+	headers  http.Header
 }
 
 func (it *dataIterator) Next(continuous bool) bool {
@@ -45,8 +46,9 @@ func (it *dataIterator) Value() (Target, error) {
 		}
 	}
 
-	h := http.Header{}
-	h.Add("Content-Type", "text/xml; charset=utf-8")
-	retVal := urlTarget{method: it.verb, url: it.url, headers: h, body: body.String()}
+	//h := http.Header{}
+	//h.Add("Content-Type", "text/xml; charset=utf-8")
+	//h.Add("Content-Type", "application/x-www-form-urlencoded")
+	retVal := urlTarget{method: it.verb, url: it.url, headers: it.headers, body: body.String()}
 	return &retVal, nil
 }
