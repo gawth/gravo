@@ -1,0 +1,15 @@
+target:
+    host: www.webservicex.net
+    port: 80
+    path: geoipservice.asmx
+
+rate:
+    rrate: 1
+    rtype: s
+
+verbose: false
+soap: true
+templatefile: soap.txt
+datafile: data.txt
+verb: POST
+regex: <IP>
