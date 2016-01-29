@@ -2,7 +2,7 @@
 6b. Code coverage and update tests where appropriate
 6c. Review file structures
 6d. Consider getting rid of any globals, e.g. hitURL
-7. Need usable output from running gravo
+7. Need usable output from running gravo - see below OUTPUT
 10. Need some validation in config to ensure various interdependent config items are put together - possibly include some sensible defaults
 12. Need to allow command line options - especially for which config file to use
 13.
@@ -34,5 +34,20 @@ What to do when one of them runs out?  Does a single URL imply repeatedly callin
 Currently for SOAP we construct the URL from the config.
 
 For now the simplest thing is to rename SOAP and extend to support any verb.  Same for URL.
-Can then use the "SOAP" flag to determine behaviour...
+Can then use the "SOAP" flag to determine behavior...
 
+OUTPUT
+Write a new output handler that does the following:
+- Captures the output as a timestamp (start of the request) plus time take to respond
+- Streams that output to file as a simple CSV using the start of the run to help make the file unique
+- Keep the data in memory
+- Spin up a web server that serves up the Highlight template with a json call to a data endpoint on local host
+- Provide a json endpoint for use by the web template
+- Work out how to update the graph via ajax calls
+- Pass in a command line flag that specifies a data file for display - don't run the test, just display
+- Of course the http.ListenAndServe is a blocking call.  Need to change the output handler to be a separate go routine.
+- The routine will probably need a "have you finished" channel.  The main thread can then wait for that.  At some point
+I can then add a "finish" to the web interface.
+  In the stats handler we can fire up the web server on a goroutine
+  The hanlder needs access to the data being populated by the perf test.  Should do this via a channel to
+  ensure data is shared appropriately

@@ -43,9 +43,17 @@ func (t *stubTimer) End() {
 	t.end++
 	return
 }
-func (t *stubTimer) GetTime() time.Duration {
+func (t *stubTimer) GetDuration() time.Duration {
 	t.gettime++
 	return time.Second * 10
+}
+
+func (t *stubTimer) GetStart() time.Time {
+	return time.Now()
+}
+
+func (t *stubTimer) GetEnd() time.Time {
+	return time.Now()
 }
 
 func TestUrlHit(t *testing.T) {

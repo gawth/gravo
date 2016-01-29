@@ -25,7 +25,7 @@ func (so *standardOutput) DealWithIt(r http.Response, t Timer) {
 	if so.V != nil {
 		isValid = fmt.Sprintf("%t", so.V.IsValid(payload))
 	}
-	log.Println(fmt.Sprintf(", %db, %.5fmb, %v, %v", len(payload), float64(len(payload))/1024/1024, t.GetTime(), isValid))
+	log.Println(fmt.Sprintf(", %db, %.5fmb, %v, %v", len(payload), float64(len(payload))/1024/1024, t.GetDuration(), isValid))
 	if so.Verbose {
 		fmt.Fprintln(os.Stderr, string(payload))
 	}

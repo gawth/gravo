@@ -11,7 +11,9 @@ import (
 type Timer interface {
 	Start()
 	End()
-	GetTime() time.Duration
+	GetDuration() time.Duration
+	GetStart() time.Time
+	GetEnd() time.Time
 }
 
 // Validator is used to check the output of the call to the target is valid
@@ -95,7 +97,6 @@ func runLoad(c config, i Iterator, ti Timer, o OutputHandler) {
 }
 
 func main() {
-
 	c := initialiseConfig("config.yml")
 
 	var validator Validator

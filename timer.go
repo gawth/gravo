@@ -19,6 +19,14 @@ func (t *timer) End() {
 	return
 }
 
-func (t *timer) GetTime() time.Duration {
+func (t *timer) GetDuration() time.Duration {
 	return t.finished.Sub(t.started)
+}
+
+func (t *timer) GetStart() time.Time {
+	return t.started
+}
+
+func (t *timer) GetEnd() time.Time {
+	return t.finished
 }
