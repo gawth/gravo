@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"net/http"
 	"sync"
@@ -98,6 +99,9 @@ func runLoad(c config, i Iterator, ti Timer, o OutputHandler) {
 
 func main() {
 	c := initialiseConfig("config.yml")
+	var resultsFile string
+	flag.StringVar(&resultsFile, "file", "", "results file from previous run")
+	flag.Parse()
 
 	var validator Validator
 	var output standardOutput
@@ -107,7 +111,12 @@ func main() {
 	} else {
 		output = standardOutput{Verbose: c.Verbose}
 	}
-	if len(c.DataFile) > 0 {
+
+	if len(resultsFile) > 0 {
+		results := chartHandler{filename: resultsFile, completed: make(chan bool)}
+		results.Start()
+		<-results.completed
+	} else if len(c.DataFile) > 0 {
 		iterator := dataIterator{url: c.Target.urls[0], columns: c.columns, data: c.data, template: c.template, verb: c.Verb, headers: c.Headers}
 		runLoad(c, &iterator, &timer{}, &output)
 	} else {

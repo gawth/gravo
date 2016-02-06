@@ -3,16 +3,20 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/mux"
 )
 
 type chartHandler struct {
-	data   []string
-	logger chan string
+	filename  string
+	completed chan bool
+	data      []string
+	logger    chan string
 }
 
 func (ch *chartHandler) DealWithIt(r http.Response, t Timer) {
@@ -41,6 +45,14 @@ func (ch *chartHandler) statsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(j)
 }
 
+func resultsHandler(w http.ResponseWriter, r *http.Request) {
+	t, err := template.ParseFiles("results.html")
+	if err != nil {
+		log.Fatal(err)
+	}
+	t.Execute(w, nil)
+}
+
 func (ch *chartHandler) updateData() {
 	for {
 		d := <-ch.logger
@@ -48,13 +60,26 @@ func (ch *chartHandler) updateData() {
 	}
 }
 
+func (ch *chartHandler) loadData() {
+	d, err := ioutil.ReadFile(ch.filename)
+	if err != nil {
+		log.Panic(err)
+	}
+	ch.data = deleteBlanks(strings.Split(string(d), "\n"))
+}
+
 func (ch *chartHandler) Start() {
 	ch.logger = make(chan string)
+
+	if len(ch.filename) > 0 {
+		ch.loadData()
+	}
 
 	go ch.updateData()
 
 	r := mux.NewRouter()
 	r.HandleFunc("/stats", ch.statsHandler).Methods("GET")
+	r.HandleFunc("/results", resultsHandler).Methods("GET")
 	http.Handle("/", r)
 	fmt.Println("Listening on port 8080")
 	go http.ListenAndServe(":8080", nil)
