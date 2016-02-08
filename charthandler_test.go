@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 )
 
@@ -43,5 +44,33 @@ func TestStatsHandlerHappyPath(t *testing.T) {
 
 	if len(out) != 2 {
 		t.Errorf("TestStatsHandlerHappyPath: Expected '%v' to be length 2 but was length %v", out, len(out))
+	}
+}
+
+func TestStatsHandlerPreLoadedData(t *testing.T) {
+	data := []string{"1", "2"}
+	target := chartHandler{data: data}
+	testServer := httptest.NewServer(http.HandlerFunc(target.statsHandler))
+	defer testServer.Close()
+
+	resp, err := http.Get(testServer.URL)
+	if err != nil {
+		t.Errorf("TestStatsHandlerPreLoadedData: Test server returned an error")
+	}
+
+	results, err := ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	if err != nil {
+		t.Errorf("TestStatsHandlerPreLoadedData: Unable to process body")
+	}
+
+	var out []string
+	err = json.Unmarshal(results, &out)
+	if err != nil {
+		t.Errorf("TestStatsHandlerPreLoadedData: Unable to parse json response")
+	}
+
+	if len(out) != 2 {
+		t.Errorf("TestStatsHandlerPreLoadedData: Expected '%v' to be length 2 but was length %v", out, len(out))
 	}
 }
