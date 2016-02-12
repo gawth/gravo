@@ -7,27 +7,33 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"strings"
+	"os"
+	"time"
 
 	"github.com/gorilla/mux"
 )
 
+type metric struct {
+	Datetime time.Time
+	Val      int64
+}
+
 type chartHandler struct {
 	filename  string
 	completed chan bool
-	data      []string
-	logger    chan string
+	data      []metric
+	logger    chan metric
 }
 
 func (ch *chartHandler) DealWithIt(r http.Response, t Timer) {
-	payload, err := ioutil.ReadAll(r.Body)
+	_, err := ioutil.ReadAll(r.Body)
 	r.Body.Close()
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	ch.logger <- fmt.Sprintf("%v, %v, %v", t.GetStart(), t.GetDuration(), len(payload))
+	ch.logger <- metric{t.GetStart(), t.GetDuration().Nanoseconds()}
 
 	return
 }
@@ -36,7 +42,7 @@ func (ch *chartHandler) LogInfo(s string) {
 }
 
 func (ch *chartHandler) statsHandler(w http.ResponseWriter, r *http.Request) {
-	j, err := json.Marshal(ch.data)
+	j, err := json.MarshalIndent(ch.data, "", "   ")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -61,15 +67,39 @@ func (ch *chartHandler) updateData() {
 }
 
 func (ch *chartHandler) loadData() {
-	d, err := ioutil.ReadFile(ch.filename)
+	f, err := os.Open(ch.filename)
+	defer f.Close()
+	dec := json.NewDecoder(f)
+	// read open bracket
+	t, err := dec.Token()
 	if err != nil {
-		log.Panic(err)
+		log.Fatal(err)
 	}
-	ch.data = deleteBlanks(strings.Split(string(d), "\n"))
+
+	// while the array contains values
+	for dec.More() {
+
+		var m metric
+		// decode an array value (Message)
+		err := dec.Decode(&m)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Printf("%v: %v\n", m.Datetime, m.Val)
+		ch.data = append(ch.data, m)
+	}
+
+	// read closing bracket
+	t, err = dec.Token()
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("%T: %v\n", t, t)
 }
 
 func (ch *chartHandler) Start() {
-	ch.logger = make(chan string)
+	ch.logger = make(chan metric)
 
 	if len(ch.filename) > 0 {
 		ch.loadData()
