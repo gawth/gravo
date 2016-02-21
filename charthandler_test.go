@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 )
 
 func TestStatsHandlerHappyPath(t *testing.T) {
@@ -36,10 +37,10 @@ func TestStatsHandlerHappyPath(t *testing.T) {
 		t.Errorf("TestStatsHandlerHappyPath: Unable to process body")
 	}
 
-	var out []string
+	var out []metric
 	err = json.Unmarshal(results, &out)
 	if err != nil {
-		t.Errorf("TestStatsHandlerHappyPath: Unable to parse json response")
+		t.Errorf("TestStatsHandlerHappyPath: Unable to parse json response:%v", results)
 	}
 
 	if len(out) != 2 {
@@ -48,7 +49,8 @@ func TestStatsHandlerHappyPath(t *testing.T) {
 }
 
 func TestStatsHandlerPreLoadedData(t *testing.T) {
-	data := []string{"1", "2"}
+	tm := time.Now()
+	data := []metric{{tm, 123}, {tm, 345}}
 	target := chartHandler{data: data}
 	testServer := httptest.NewServer(http.HandlerFunc(target.statsHandler))
 	defer testServer.Close()
@@ -64,7 +66,7 @@ func TestStatsHandlerPreLoadedData(t *testing.T) {
 		t.Errorf("TestStatsHandlerPreLoadedData: Unable to process body")
 	}
 
-	var out []string
+	var out []metric
 	err = json.Unmarshal(results, &out)
 	if err != nil {
 		t.Errorf("TestStatsHandlerPreLoadedData: Unable to parse json response")
