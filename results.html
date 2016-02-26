@@ -7,11 +7,10 @@
             $(function () {
                 $.getJSON('http://localhost:8080/stats', function (data) {
 
-                    console.log(data)
                     var mySeries = [];
                     for (var i = 0; i < data.length; i++) {
                         mySeries.push([data[i].Datetime,data[i].Val]);
-                        i++
+                        console.log("Date:" + [data[i].Datetime + " Val:" +data[i].Val])
                     }
 
                     $('#container').highcharts({
@@ -56,6 +55,5 @@
         <script src="https://code.highcharts.com/highcharts.js"></script>
         <script src="https://code.highcharts.com/modules/exporting.js"></script>
         <div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
-        <p>Hello</p>
     </body>
 </html>

@@ -69,9 +69,16 @@ func (ch *chartHandler) updateData() {
 func (ch *chartHandler) loadData() {
 	f, err := os.Open(ch.filename)
 	defer f.Close()
+
+	if err != nil {
+		if os.IsNotExist(err) {
+			return
+		}
+		log.Fatal(err)
+	}
 	dec := json.NewDecoder(f)
 	// read open bracket
-	t, err := dec.Token()
+	_, err = dec.Token()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -86,30 +93,29 @@ func (ch *chartHandler) loadData() {
 			log.Fatal(err)
 		}
 
-		fmt.Printf("%v: %v\n", m.Datetime, m.Val)
 		ch.data = append(ch.data, m)
 	}
 
 	// read closing bracket
-	t, err = dec.Token()
+	_, err = dec.Token()
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("%T: %v\n", t, t)
 }
 
 func (ch *chartHandler) Start() {
 	ch.logger = make(chan metric)
 
-	if len(ch.filename) > 0 {
-		ch.loadData()
+	if len(ch.filename) == 0 {
+		log.Fatal("Must specify a filename for results")
 	}
+	ch.loadData()
 
 	go ch.updateData()
 
 	r := mux.NewRouter()
 	r.HandleFunc("/stats", ch.statsHandler).Methods("GET")
-	r.HandleFunc("/results", resultsHandler).Methods("GET")
+	r.HandleFunc("/results/"+ch.filename, resultsHandler).Methods("GET")
 	http.Handle("/", r)
 	fmt.Println("Listening on port 8080")
 	go http.ListenAndServe(":8080", nil)

@@ -38,16 +38,24 @@ Can then use the "SOAP" flag to determine behavior...
 
 OUTPUT
 Write a new output handler that does the following:
-- Captures the output as a timestamp (start of the request) plus time take to respond
+| Captures the output as a timestamp (start of the request) plus time take to respond
 - Streams that output to file as a simple CSV using the start of the run to help make the file unique
-- Keep the data in memory
-- Spin up a web server that serves up the Highlight template with a json call to a data endpoint on local host
-- Provide a json endpoint for use by the web template
+| Keep the data in memory
+| Spin up a web server that serves up the Highlight template with a json call to a data endpoint on local host
+| Provide a json endpoint for use by the web template
 - Work out how to update the graph via ajax calls
-- Pass in a command line flag that specifies a data file for display - don't run the test, just display
-- Of course the http.ListenAndServe is a blocking call.  Need to change the output handler to be a separate go routine.
+| Pass in a command line flag that specifies a data file for display - don't run the test, just display
+| Of course the http.ListenAndServe is a blocking call.  Need to change the output handler to be a separate go routine.
 - The routine will probably need a "have you finished" channel.  The main thread can then wait for that.  At some point
-I can then add a "finish" to the web interface.
+  I can then add a "finish" to the web interface.
   In the stats handler we can fire up the web server on a goroutine
   The hanlder needs access to the data being populated by the perf test.  Should do this via a channel to
   ensure data is shared appropriately
+- Change charthandler to check for existing of file rather than file name.  If the file exists then load 
+  the content.  If it does, create it and output data to it
+- Always pass a file name in to charthandler
+- Use the filename (main part) as the URL for the results - will need to setup routing correctly
+- When metrics come in to the handler need to both write the file and keep in memory
+- Should these be separate?  A handler that dumps to file, the other that holds in mem?
+
+

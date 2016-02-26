@@ -6,12 +6,15 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"os/exec"
 	"testing"
 	"time"
 )
 
 func TestStatsHandlerHappyPath(t *testing.T) {
-	target := chartHandler{}
+	testfile := "testfile"
+	target := chartHandler{filename: testfile}
 	client := &http.Client{}
 
 	data := http.Response{
@@ -46,6 +49,32 @@ func TestStatsHandlerHappyPath(t *testing.T) {
 	if len(out) != 2 {
 		t.Errorf("TestStatsHandlerHappyPath: Expected '%v' to be length 2 but was length %v", out, len(out))
 	}
+	req, err = http.NewRequest("GET", "http://localhost:8080/results/"+testfile, nil)
+	if err != nil {
+		t.Errorf("TestStatsHandlerHappyPath: unable to create request")
+	}
+	resp, err = client.Do(req)
+	if err != nil {
+		t.Errorf("TestStatsHandlerHappyPath: Got http error from results")
+	}
+	if resp.StatusCode != 200 {
+		t.Errorf("TestStatsHandlerHappyPath: Got a HTTP %v rather than a 200 from results", resp.StatusCode)
+	}
+}
+
+func TestStatsHandlerMissingFilename(t *testing.T) {
+	if os.Getenv("CALL") == "1" {
+		target := chartHandler{}
+		target.Start()
+		return
+	}
+	cmd := exec.Command(os.Args[0], "-test.run=TestStatsHandlerMissingFilename")
+	cmd.Env = append(os.Environ(), "CALL=1")
+	err := cmd.Run()
+	if e, ok := err.(*exec.ExitError); ok && !e.Success() {
+		return
+	}
+	t.Errorf("Call should have aborted with an error but returned %v", err)
 }
 
 func TestStatsHandlerPreLoadedData(t *testing.T) {
