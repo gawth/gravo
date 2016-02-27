@@ -26,7 +26,7 @@ func TestStatsHandlerHappyPath(t *testing.T) {
 	target.DealWithIt(data, &tm)
 	target.DealWithIt(data, &tm)
 
-	req, err := http.NewRequest("GET", "http://localhost:8080/stats", nil)
+	req, err := http.NewRequest("GET", "http://localhost:8910/stats", nil)
 	if err != nil {
 		t.Errorf("TestStatsHandlerHappyPath: unable to create request")
 	}
@@ -49,7 +49,7 @@ func TestStatsHandlerHappyPath(t *testing.T) {
 	if len(out) != 2 {
 		t.Errorf("TestStatsHandlerHappyPath: Expected '%v' to be length 2 but was length %v", out, len(out))
 	}
-	req, err = http.NewRequest("GET", "http://localhost:8080/results/"+testfile, nil)
+	req, err = http.NewRequest("GET", "http://localhost:8910/results/"+testfile, nil)
 	if err != nil {
 		t.Errorf("TestStatsHandlerHappyPath: unable to create request")
 	}

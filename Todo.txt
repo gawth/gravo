@@ -5,7 +5,8 @@
 7. Need usable output from running gravo - see below OUTPUT
 10. Need some validation in config to ensure various interdependent config items are put together - possibly include some sensible defaults
 12. Need to allow command line options - especially for which config file to use
-13.
+13. Consider serving up a results page with a link to the inflight results and any previous results
+14. 
 
 
 DONE
@@ -51,11 +52,15 @@ Write a new output handler that does the following:
   In the stats handler we can fire up the web server on a goroutine
   The hanlder needs access to the data being populated by the perf test.  Should do this via a channel to
   ensure data is shared appropriately
-- Change charthandler to check for existing of file rather than file name.  If the file exists then load 
+| Change charthandler to check for existing of file rather than file name.  If the file exists then load 
   the content.  If it does, create it and output data to it
-- Always pass a file name in to charthandler
-- Use the filename (main part) as the URL for the results - will need to setup routing correctly
+| Always pass a file name in to charthandler
+| Use the filename (main part) as the URL for the results - will need to setup routing correctly
 - When metrics come in to the handler need to both write the file and keep in memory
 - Should these be separate?  A handler that dumps to file, the other that holds in mem?
-
+  Found a good way of doing this.  http://stackoverflow.com/a/16931348 shows how to 
+  do a pubsub pattern in go.  Basically you can use a fan out func to link one pub 
+  channel to many (slice) other channels.  I can use this to pass output from the 
+  main gravo thread to the output handlers.
+- Need to look into bundling the template in with the exe
 
