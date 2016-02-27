@@ -105,3 +105,13 @@ func TestStatsHandlerPreLoadedData(t *testing.T) {
 		t.Errorf("TestStatsHandlerPreLoadedData: Expected '%v' to be length 2 but was length %v", out, len(out))
 	}
 }
+
+func TestGenerateFilename(t *testing.T) {
+	tm, _ := time.Parse("2006-01-02 03:04", "2016-04-04 12:30")
+	res := generateFilename(tm)
+	tar := "20160404_123000"
+	if res != tar {
+		t.Errorf("TestGenerateFilename: %v should have been %v", res, tar)
+	}
+
+}

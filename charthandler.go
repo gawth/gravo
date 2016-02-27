@@ -10,6 +10,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
@@ -63,6 +64,7 @@ func (ch *chartHandler) updateData() {
 	for {
 		d := <-ch.logger
 		ch.data = append(ch.data, d)
+		fmt.Printf("%v\n", d)
 	}
 }
 
@@ -115,8 +117,11 @@ func (ch *chartHandler) Start() {
 
 	r := mux.NewRouter()
 	r.HandleFunc("/stats", ch.statsHandler).Methods("GET")
+	r.HandleFunc("/results", resultsHandler).Methods("GET")
 	r.HandleFunc("/results/"+ch.filename, resultsHandler).Methods("GET")
-	http.Handle("/", r)
-	fmt.Println("Listening on port 8080")
-	go http.ListenAndServe(":8080", nil)
+
+	loggedRouter := handlers.LoggingHandler(os.Stdout, r)
+
+	fmt.Println("Listening on port http://localhost:8910/results/" + ch.filename)
+	go http.ListenAndServe(":8910", loggedRouter)
 }

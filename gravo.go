@@ -97,31 +97,48 @@ func runLoad(c config, i Iterator, ti Timer, o OutputHandler) {
 
 }
 
+func generateFilename(seed time.Time) string {
+	// The format command uses 15:04:05 on the 12th Jan 2006 as a reference date
+	// for format/structure
+	return seed.Format("20060102_150405")
+}
+
 func main() {
+	var displayResults bool = false
 	c := initialiseConfig("config.yml")
 	var resultsFile string
 	flag.StringVar(&resultsFile, "file", "", "results file from previous run")
 	flag.Parse()
 
-	var validator Validator
-	var output standardOutput
-	if len(c.Regex) > 0 {
-		validator = &regexValidator{c.validator}
-		output = standardOutput{c.Verbose, validator}
+	if len(resultsFile) > 0 {
+		displayResults = true
 	} else {
-		output = standardOutput{Verbose: c.Verbose}
+		resultsFile = generateFilename(time.Now())
 	}
 
-	if len(resultsFile) > 0 {
-		results := chartHandler{filename: resultsFile, completed: make(chan bool)}
-		results.Start()
-		<-results.completed
+	//var validator Validator
+	//var output standardOutput
+	//if len(c.Regex) > 0 {
+	//	validator = &regexValidator{c.validator}
+	//	output = standardOutput{c.Verbose, validator}
+	//} else {
+	//	output = standardOutput{Verbose: c.Verbose}
+	//}
+
+	results := chartHandler{filename: resultsFile, completed: make(chan bool)}
+	results.Start()
+
+	if displayResults {
+		// No load test
 	} else if len(c.DataFile) > 0 {
+		// Load test using data from file
 		iterator := dataIterator{url: c.Target.urls[0], columns: c.columns, data: c.data, template: c.template, verb: c.Verb, headers: c.Headers}
-		runLoad(c, &iterator, &timer{}, &output)
+		runLoad(c, &iterator, &timer{}, &results)
 	} else {
+		// Load test using specified URL
 		iterator := urlIterator{urls: c.Target.urls, verb: c.Verb}
-		runLoad(c, &iterator, &timer{}, &output)
+		runLoad(c, &iterator, &timer{}, &results)
 	}
+	<-results.completed
 
 }
