@@ -24,6 +24,7 @@ type chartHandler struct {
 	completed chan bool
 	data      []metric
 	logger    chan metric
+	parent    OutputHandler
 }
 
 func (ch *chartHandler) DealWithIt(r http.Response, t Timer) {
@@ -124,4 +125,11 @@ func (ch *chartHandler) Start() {
 
 	fmt.Println("Listening on port http://localhost:8910/results/" + ch.filename)
 	go http.ListenAndServe(":8910", loggedRouter)
+}
+
+func ChartHandler(resultsFile string, channel chan bool, parent OutputHandler) OutputHandler {
+	if parent == nil {
+		return &chartHandler{filename: resultsFile, completed: channel, parent: NullHandler()}
+	}
+	return &chartHandler{filename: resultsFile, completed: channel, parent: parent}
 }

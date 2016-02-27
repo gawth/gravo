@@ -116,16 +116,15 @@ func main() {
 		resultsFile = generateFilename(time.Now())
 	}
 
-	//var validator Validator
-	//var output standardOutput
-	//if len(c.Regex) > 0 {
-	//	validator = &regexValidator{c.validator}
-	//	output = standardOutput{c.Verbose, validator}
-	//} else {
-	//	output = standardOutput{Verbose: c.Verbose}
-	//}
+	var validator Validator
+	var output OutputHandler
+	if len(c.Regex) > 0 {
+		validator = &regexValidator{c.validator}
+	}
+	output = StandardOutput(c.Verbose, validator, nil)
 
-	results := chartHandler{filename: resultsFile, completed: make(chan bool)}
+	waitforit := make(chan bool)
+	results := ChartHandler(resultsFile, waitforit, output)
 	results.Start()
 
 	if displayResults {
@@ -133,12 +132,12 @@ func main() {
 	} else if len(c.DataFile) > 0 {
 		// Load test using data from file
 		iterator := dataIterator{url: c.Target.urls[0], columns: c.columns, data: c.data, template: c.template, verb: c.Verb, headers: c.Headers}
-		runLoad(c, &iterator, &timer{}, &results)
+		runLoad(c, &iterator, &timer{}, results)
 	} else {
 		// Load test using specified URL
 		iterator := urlIterator{urls: c.Target.urls, verb: c.Verb}
-		runLoad(c, &iterator, &timer{}, &results)
+		runLoad(c, &iterator, &timer{}, results)
 	}
-	<-results.completed
+	<-waitforit
 
 }

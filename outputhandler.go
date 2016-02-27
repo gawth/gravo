@@ -11,6 +11,7 @@ import (
 type standardOutput struct {
 	Verbose bool
 	V       Validator
+	parent  OutputHandler
 }
 
 func (so *standardOutput) DealWithIt(r http.Response, t Timer) {
@@ -40,4 +41,11 @@ func (so *standardOutput) LogInfo(s string) {
 
 func (so *standardOutput) Start() {
 	fmt.Println("timestamp, bytes, meg, duration, valid")
+}
+
+func StandardOutput(verbose bool, validator Validator, parent OutputHandler) OutputHandler {
+	if parent == nil {
+		return &standardOutput{Verbose: verbose, V: validator, parent: NullHandler()}
+	}
+	return &standardOutput{verbose, validator, parent}
 }
