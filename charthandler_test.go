@@ -14,7 +14,7 @@ import (
 
 func TestStatsHandlerHappyPath(t *testing.T) {
 	testfile := "testfile"
-	target := chartHandler{filename: testfile}
+	target := ChartHandler(testfile, make(chan bool), nil)
 	client := &http.Client{}
 
 	data := http.Response{
@@ -64,7 +64,7 @@ func TestStatsHandlerHappyPath(t *testing.T) {
 
 func TestStatsHandlerMissingFilename(t *testing.T) {
 	if os.Getenv("CALL") == "1" {
-		target := chartHandler{}
+		target := ChartHandler("", make(chan bool), nil)
 		target.Start()
 		return
 	}
@@ -80,7 +80,9 @@ func TestStatsHandlerMissingFilename(t *testing.T) {
 func TestStatsHandlerPreLoadedData(t *testing.T) {
 	tm := time.Now()
 	data := []metric{{tm, 123}, {tm, 345}}
-	target := chartHandler{data: data}
+	target := ChartHandler("file", make(chan bool), nil).(*chartHandler)
+
+	target.data = data
 	testServer := httptest.NewServer(http.HandlerFunc(target.statsHandler))
 	defer testServer.Close()
 
@@ -113,5 +115,27 @@ func TestGenerateFilename(t *testing.T) {
 	if res != tar {
 		t.Errorf("TestGenerateFilename: %v should have been %v", res, tar)
 	}
+
+}
+
+func TestChartHandlerDealWithIt(t *testing.T) {
+	targetChannel := make(chan bool)
+	target := ChartHandler("resfile", targetChannel, nil).(*chartHandler)
+	expectedDuration := time.Second * 99
+
+	go func(ch chan metric) {
+		res := <-ch
+		if res.Val != int64(expectedDuration) {
+			t.Errorf("TestDealWithIt Expected %v but got %v", expectedDuration, res.Val)
+		}
+		return
+	}(target.logger)
+
+	expectedRes := bytes.NewBuffer([]byte("Test"))
+
+	var response http.Response
+	response.Body = nopCloser{expectedRes}
+
+	target.DealWithIt(response, &stubTimer{duration: expectedDuration})
 
 }

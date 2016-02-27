@@ -107,7 +107,6 @@ func (ch *chartHandler) loadData() {
 }
 
 func (ch *chartHandler) Start() {
-	ch.logger = make(chan metric)
 
 	if len(ch.filename) == 0 {
 		log.Fatal("Must specify a filename for results")
@@ -128,8 +127,11 @@ func (ch *chartHandler) Start() {
 }
 
 func ChartHandler(resultsFile string, channel chan bool, parent OutputHandler) OutputHandler {
+	var val *chartHandler
 	if parent == nil {
-		return &chartHandler{filename: resultsFile, completed: channel, parent: NullHandler()}
+		val = &chartHandler{filename: resultsFile, completed: channel, parent: NullHandler()}
 	}
-	return &chartHandler{filename: resultsFile, completed: channel, parent: parent}
+	val = &chartHandler{filename: resultsFile, completed: channel, parent: parent}
+	val.logger = make(chan metric)
+	return val
 }

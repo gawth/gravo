@@ -30,9 +30,10 @@ func (so *stubOutput) Start() {
 }
 
 type stubTimer struct {
-	start   int
-	end     int
-	gettime int
+	start    int
+	end      int
+	gettime  int
+	duration time.Duration
 }
 
 func (t *stubTimer) Start() {
@@ -45,7 +46,7 @@ func (t *stubTimer) End() {
 }
 func (t *stubTimer) GetDuration() time.Duration {
 	t.gettime++
-	return time.Second * 10
+	return t.duration
 }
 
 func (t *stubTimer) GetStart() time.Time {
