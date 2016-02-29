@@ -129,7 +129,7 @@ func (ch *chartHandler) Start() {
 func ChartHandler(resultsFile string, channel chan bool, parent OutputHandler) OutputHandler {
 	var val *chartHandler
 	if parent == nil {
-		val = &chartHandler{filename: resultsFile, completed: channel, parent: NullHandler()}
+		parent = NullHandler()
 	}
 	val = &chartHandler{filename: resultsFile, completed: channel, parent: parent}
 	val.logger = make(chan metric)
