@@ -118,3 +118,28 @@ func TestGenerateFilename(t *testing.T) {
 	}
 
 }
+
+func TestDealWithIt(t *testing.T) {
+	target := chartHandler{logger: make(chan metric)}
+	var response http.Response
+	metricReceived := false
+
+	response.Body = nopCloser{bytes.NewBuffer([]byte("Expected Data"))}
+
+	testTime := time.Now()
+	timer := StubTimer(testTime, testTime.Add(time.Hour))
+
+	go func() {
+		met := <-target.logger
+		if met.Datetime != testTime {
+			t.Errorf("TestDealWithIt: Expected %v but got %v", testTime, met.Datetime)
+		}
+		metricReceived = true
+	}()
+	target.DealWithIt(response, &timer)
+
+	if !metricReceived {
+		t.Errorf("TestDealWithIt: Channel didn't fire - no metric data came through")
+	}
+
+}

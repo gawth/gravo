@@ -30,31 +30,35 @@ func (so *stubOutput) Start() {
 }
 
 type stubTimer struct {
-	start    int
-	end      int
-	gettime  int
-	duration time.Duration
+	start     time.Time
+	callStart int
+	end       time.Time
+	callEnd   int
+	duration  time.Duration
 }
 
 func (t *stubTimer) Start() {
-	t.start++
+	t.callStart++
 	return
 }
 func (t *stubTimer) End() {
-	t.end++
+	t.callEnd++
 	return
 }
 func (t *stubTimer) GetDuration() time.Duration {
-	t.gettime++
 	return t.duration
 }
 
 func (t *stubTimer) GetStart() time.Time {
-	return time.Now()
+	return t.start
 }
 
 func (t *stubTimer) GetEnd() time.Time {
-	return time.Now()
+	return t.end
+}
+
+func StubTimer(start time.Time, end time.Time) stubTimer {
+	return stubTimer{start: start, end: end, duration: end.Sub(start)}
 }
 
 func TestUrlHit(t *testing.T) {
@@ -89,10 +93,10 @@ func TestUrlHit(t *testing.T) {
 		t.Errorf("TestUrlHit: Hit not called")
 
 	}
-	if timer.start != 1 {
+	if timer.callStart != 1 {
 		t.Errorf("TestUrlHit: Expected start time to be called once, was called %v", timer.start)
 	}
-	if timer.end != 1 {
+	if timer.callEnd != 1 {
 		t.Errorf("TestUrlHit: Expected end time to be called once, was called %v", timer.end)
 	}
 
