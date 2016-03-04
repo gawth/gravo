@@ -14,7 +14,8 @@ import (
 
 func TestStatsHandlerHappyPath(t *testing.T) {
 	testfile := "testfile"
-	target := ChartHandler(testfile, make(chan bool), NullHandler())
+	stub := StubHandler().(*stubHandler)
+	target := ChartHandler(testfile, make(chan bool), stub)
 
 	data := http.Response{
 		Body: ioutil.NopCloser(bytes.NewBufferString("Some data")),
@@ -60,6 +61,9 @@ func TestStatsHandlerHappyPath(t *testing.T) {
 	}
 	if resp.StatusCode != 200 {
 		t.Errorf("TestStatsHandlerHappyPath: Got a HTTP %v rather than a 200 from results", resp.StatusCode)
+	}
+	if stub.startCalled == 0 {
+		t.Errorf("TestChartHandlerStartParentCalled: Failed to call Start on the parent")
 	}
 }
 
@@ -160,5 +164,15 @@ func TestDealWithItParentTest(t *testing.T) {
 
 	if stub.dealCalled == 0 {
 		t.Errorf("TestDealWithItParent: Failed to call DealWithIt on the parent")
+	}
+}
+func TestChartHandlerLogInfoParent(t *testing.T) {
+	stub := StubHandler().(*stubHandler)
+	target := ChartHandler("", make(chan bool), stub).(*chartHandler)
+
+	target.LogInfo("Blahh")
+
+	if stub.logCalled == 0 {
+		t.Errorf("TestChartHandlerLogInfoParent: Failed to call LogInfo on the parent")
 	}
 }

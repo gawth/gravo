@@ -43,6 +43,7 @@ func (ch *chartHandler) DealWithIt(r http.Response, t Timer) {
 }
 
 func (ch *chartHandler) LogInfo(s string) {
+	ch.parent.LogInfo(s)
 }
 
 func (ch *chartHandler) statsHandler(w http.ResponseWriter, r *http.Request) {
@@ -126,6 +127,8 @@ func (ch *chartHandler) Start() {
 
 	fmt.Println("Listening on port http://localhost:8910/results/" + ch.filename)
 	go http.ListenAndServe(":8910", loggedRouter)
+
+	ch.parent.Start()
 }
 
 func ChartHandler(resultsFile string, channel chan bool, parent OutputHandler) OutputHandler {
