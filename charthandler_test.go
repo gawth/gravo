@@ -120,7 +120,7 @@ func TestGenerateFilename(t *testing.T) {
 }
 
 func TestDealWithIt(t *testing.T) {
-	target := chartHandler{logger: make(chan metric)}
+	target := ChartHandler("", make(chan bool), nil).(*chartHandler)
 	var response http.Response
 	metricReceived := false
 
@@ -142,4 +142,23 @@ func TestDealWithIt(t *testing.T) {
 		t.Errorf("TestDealWithIt: Channel didn't fire - no metric data came through")
 	}
 
+}
+func TestDealWithItParentTest(t *testing.T) {
+	stub := StubHandler().(*stubHandler)
+	target := ChartHandler("", make(chan bool), stub).(*chartHandler)
+
+	var response http.Response
+	response.Body = nopCloser{bytes.NewBuffer([]byte("Expected Data"))}
+
+	testTime := time.Now()
+	timer := StubTimer(testTime, testTime.Add(time.Hour))
+
+	go func() {
+		<-target.logger
+	}()
+	target.DealWithIt(response, &timer)
+
+	if stub.dealCalled == 0 {
+		t.Errorf("TestDealWithItParent: Failed to call DealWithIt on the parent")
+	}
 }

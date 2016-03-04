@@ -37,6 +37,8 @@ func (ch *chartHandler) DealWithIt(r http.Response, t Timer) {
 
 	ch.logger <- metric{t.GetStart(), t.GetDuration().Nanoseconds()}
 
+	ch.parent.DealWithIt(r, t)
+
 	return
 }
 
