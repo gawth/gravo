@@ -30,6 +30,8 @@ func (so *standardOutput) DealWithIt(r http.Response, t Timer) {
 	if so.Verbose {
 		fmt.Fprintln(os.Stderr, string(payload))
 	}
+
+	so.parent.DealWithIt(r, t)
 	return
 }
 
@@ -37,10 +39,12 @@ func (so *standardOutput) LogInfo(s string) {
 	if so.Verbose {
 		fmt.Fprintln(os.Stderr, s)
 	}
+	so.parent.LogInfo(s)
 }
 
 func (so *standardOutput) Start() {
 	fmt.Println("timestamp, bytes, meg, duration, valid")
+	so.parent.Start()
 }
 
 func StandardOutput(verbose bool, validator Validator, parent OutputHandler) OutputHandler {
