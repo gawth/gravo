@@ -1,11 +1,9 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -29,16 +27,8 @@ type chartHandler struct {
 }
 
 func (ch *chartHandler) DealWithIt(r http.Response, t Timer) {
-	savedBody, err := ioutil.ReadAll(r.Body)
-	defer r.Body.Close()
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
 	ch.logger <- metric{t.GetStart(), t.GetDuration().Nanoseconds()}
 
-	r.Body = ioutil.NopCloser(bytes.NewBuffer(savedBody))
 	ch.parent.DealWithIt(r, t)
 
 	return
