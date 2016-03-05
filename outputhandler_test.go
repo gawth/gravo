@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"io/ioutil"
 	"net/http"
 	"testing"
 	"time"
@@ -33,8 +34,9 @@ func TestStandardOutputDealWithIt(t *testing.T) {
 	stubP := StubHandler().(*stubHandler)
 	target := StandardOutput(false, nil, stubP)
 
+	expectedData := []byte("Expected Data")
 	var response http.Response
-	response.Body = nopCloser{bytes.NewBuffer([]byte("Expected Data"))}
+	response.Body = nopCloser{bytes.NewBuffer(expectedData)}
 
 	testTime := time.Now()
 	timer := StubTimer(testTime, testTime.Add(time.Hour))
@@ -43,6 +45,13 @@ func TestStandardOutputDealWithIt(t *testing.T) {
 
 	if stubP.dealCalled == 0 {
 		t.Errorf("TestStandardOutputDealWithIt: Failed to call DealWithIt on the parent")
+	}
+	result, err := ioutil.ReadAll(stubP.savedBody)
+	if err != nil {
+		t.Errorf("TestStandardOutputDealWithIt: Failed to read expected data from parent call, err %v", err)
+	}
+	if !bytes.Equal(result, expectedData) {
+		t.Errorf("TestStandardOutputDealWithIt: Expected '%v' but got '%v'", expectedData, result)
 	}
 
 }

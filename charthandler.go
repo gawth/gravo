@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -28,8 +29,8 @@ type chartHandler struct {
 }
 
 func (ch *chartHandler) DealWithIt(r http.Response, t Timer) {
-	_, err := ioutil.ReadAll(r.Body)
-	r.Body.Close()
+	savedBody, err := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
 	if err != nil {
 		log.Println(err)
 		return
@@ -37,6 +38,7 @@ func (ch *chartHandler) DealWithIt(r http.Response, t Timer) {
 
 	ch.logger <- metric{t.GetStart(), t.GetDuration().Nanoseconds()}
 
+	r.Body = ioutil.NopCloser(bytes.NewBuffer(savedBody))
 	ch.parent.DealWithIt(r, t)
 
 	return
@@ -68,7 +70,6 @@ func (ch *chartHandler) updateData() {
 	for {
 		d := <-ch.logger
 		ch.data = append(ch.data, d)
-		fmt.Printf("%v\n", d)
 	}
 }
 

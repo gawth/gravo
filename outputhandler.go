@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -15,8 +16,9 @@ type standardOutput struct {
 }
 
 func (so *standardOutput) DealWithIt(r http.Response, t Timer) {
+
 	payload, err := ioutil.ReadAll(r.Body)
-	r.Body.Close()
+	defer r.Body.Close()
 	if err != nil {
 		log.Println(err)
 		return
@@ -27,10 +29,9 @@ func (so *standardOutput) DealWithIt(r http.Response, t Timer) {
 		isValid = fmt.Sprintf("%t", so.V.IsValid(payload))
 	}
 	log.Println(fmt.Sprintf(", %db, %.5fmb, %v, %v", len(payload), float64(len(payload))/1024/1024, t.GetDuration(), isValid))
-	if so.Verbose {
-		fmt.Fprintln(os.Stderr, string(payload))
-	}
+	so.LogInfo("Response: " + string(payload) + "\n")
 
+	r.Body = ioutil.NopCloser(bytes.NewBuffer(payload))
 	so.parent.DealWithIt(r, t)
 	return
 }

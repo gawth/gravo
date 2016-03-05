@@ -1,14 +1,19 @@
 package main
 
-import "net/http"
+import (
+	"io"
+	"net/http"
+)
 
 type stubHandler struct {
 	dealCalled  int
+	savedBody   io.ReadCloser
 	logCalled   int
 	startCalled int
 }
 
 func (this *stubHandler) DealWithIt(r http.Response, t Timer) {
+	this.savedBody = r.Body
 	this.dealCalled++
 }
 

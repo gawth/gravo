@@ -1,15 +1,21 @@
+
 6. Code review to get rid of any dodgy bits
 6b. Code coverage and update tests where appropriate
 6c. Review file structures
 6d. Consider getting rid of any globals, e.g. hitURL
-7. Need usable output from running gravo - see below OUTPUT
 10. Need some validation in config to ensure various interdependent config items are put together - possibly include some sensible defaults
 12. Need to allow command line options - especially for which config file to use
 13. Consider serving up a results page with a link to the inflight results and any previous results
-14. 
-
+14. Save results to file in the first format for display later
+15. Default page shows previous results "files", picking on launches with that data
+16. Look at using http://hdrhistogram.org/
+17. Bundle template with exe
+18. Ajax updates to the graph
+19. Finish off string together the different output handlers
 
 DONE
+20. Fix bug in DealWithIt.  Reading the body leaves the ReadCloser empty for the parent
+7. Need usable output from running gravo - see below OUTPUT
 8. Allow addition of a validator - eval a user specified regex on the output
 11. Extend verbose to dump out return from service calls - already a feature!
 9b. Support for http verbs other than GET - See VERBS section below..a35d2fdcfbd57269e75aae596be545a9b190ba3c
@@ -64,3 +70,10 @@ Write a new output handler that does the following:
   main gravo thread to the output handlers.
 - Need to look into bundling the template in with the exe
 
+Bug 20: Found a bug such that the DealWithIt chain of calls 
+doesn't work correctly.  The first one works ok but passing the response 
+to the parent doesn't work because once an io.reader finishes you can't then 
+just reread it.  Need to put a failing test in (somehow) and then find a 
+way to reset the reader.  Also, sometimes we don't need the payload so maybe 
+don't need to read the full thing all the time...
+Found https://medium.com/@xoen/golang-read-from-an-io-readwriter-without-loosing-its-content-2c6911805361#.9v0j1xahn

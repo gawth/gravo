@@ -151,8 +151,9 @@ func TestDealWithItParentTest(t *testing.T) {
 	stub := StubHandler().(*stubHandler)
 	target := ChartHandler("", make(chan bool), stub).(*chartHandler)
 
+	expectedData := []byte("Expected Data")
 	var response http.Response
-	response.Body = nopCloser{bytes.NewBuffer([]byte("Expected Data"))}
+	response.Body = nopCloser{bytes.NewBuffer(expectedData)}
 
 	testTime := time.Now()
 	timer := StubTimer(testTime, testTime.Add(time.Hour))
@@ -165,6 +166,15 @@ func TestDealWithItParentTest(t *testing.T) {
 	if stub.dealCalled == 0 {
 		t.Errorf("TestDealWithItParent: Failed to call DealWithIt on the parent")
 	}
+
+	result, err := ioutil.ReadAll(stub.savedBody)
+	if err != nil {
+		t.Errorf("TestDealWithItParent: Failed to read expected data from parent call, err %v", err)
+	}
+	if !bytes.Equal(result, expectedData) {
+		t.Errorf("TestDealWithItParent: Expected '%v' but got '%v'", expectedData, result)
+	}
+
 }
 func TestChartHandlerLogInfoParent(t *testing.T) {
 	stub := StubHandler().(*stubHandler)
