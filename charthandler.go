@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -73,30 +75,23 @@ func (ch *chartHandler) loadData() {
 		}
 		log.Fatal(err)
 	}
-	dec := json.NewDecoder(f)
-	// read open bracket
-	_, err = dec.Token()
-	if err != nil {
-		log.Fatal(err)
-	}
+	ch.parseData(bufio.NewReader(f))
+}
+func (ch *chartHandler) parseData(stream io.Reader) {
 
-	// while the array contains values
-	for dec.More() {
+	scanner := bufio.NewScanner(stream)
+
+	for scanner.Scan() {
 
 		var m metric
-		// decode an array value (Message)
-		err := dec.Decode(&m)
-		if err != nil {
-			log.Fatal(err)
+
+		// Ignore lines that don't convert to metric
+		if err := json.Unmarshal(scanner.Bytes(), &m); err == nil {
+			ch.data = append(ch.data, m)
 		}
-
-		ch.data = append(ch.data, m)
-	}
-
-	// read closing bracket
-	_, err = dec.Token()
-	if err != nil {
-		log.Fatal(err)
+		if len(ch.data) == 0 {
+			log.Fatalln("Attempted to process file but contains no valid metrics")
+		}
 	}
 }
 

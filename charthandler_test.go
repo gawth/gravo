@@ -186,3 +186,20 @@ func TestChartHandlerLogInfoParent(t *testing.T) {
 		t.Errorf("TestChartHandlerLogInfoParent: Failed to call LogInfo on the parent")
 	}
 }
+
+func TestChartHandlerParseData(t *testing.T) {
+	jsondata := metric{Datetime: time.Now(), Val: 1234}
+	rawBytes, _ := json.Marshal(jsondata)
+	buf := bytes.NewBuffer(rawBytes)
+	buf.Write([]byte("\nand another line plus blanks\n\n\n"))
+	buf.Write(rawBytes)
+	data := ioutil.NopCloser(buf)
+
+	stub := StubHandler().(*stubHandler)
+	target := ChartHandler("", make(chan bool), stub).(*chartHandler)
+
+	target.parseData(data)
+	if len(target.data) != 2 {
+		t.Errorf("TestChartHandlerParseData: Expected two metrics to be stored, got %v", len(target.data))
+	}
+}
