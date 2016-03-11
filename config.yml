@@ -7,7 +7,7 @@ rate:
     rrate: 1
     rtype: s
 
-verbose: true
+verbose: false
 templatefile: pdt.txt
 datafile: pd.txt
 verb: POST
