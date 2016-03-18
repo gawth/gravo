@@ -13,6 +13,7 @@
 18. Ajax updates to the graph
 19. Finish off string together the different output handlers
 20. URLs are currently hard coded in both the server and the HTML
+21.
 
 DONE
 20. Fix bug in DealWithIt.  Reading the body leaves the ReadCloser empty for the parent e2f3b4e9f7b0a476d9ff4d2a8683f37703dff439
