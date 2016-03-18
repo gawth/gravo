@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"os/exec"
+	"strings"
 	"testing"
 	"time"
 )
@@ -201,5 +202,33 @@ func TestChartHandlerParseData(t *testing.T) {
 	target.parseData(data)
 	if len(target.data) != 2 {
 		t.Errorf("TestChartHandlerParseData: Expected two metrics to be stored, got %v", len(target.data))
+	}
+}
+
+func TestResultsList(t *testing.T) {
+	target := ChartHandler("fred", make(chan bool), NullHandler()).(*chartHandler)
+	target.fileList = []string{"file1", "file2"}
+
+	testServer := httptest.NewServer(http.HandlerFunc(target.resultsList))
+	defer testServer.Close()
+
+	resp, err := http.Get(testServer.URL)
+	if err != nil {
+		t.Errorf("TestResultsList: Test server returned an error")
+	}
+
+	res, err := ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	if err != nil {
+		t.Errorf("TestResultsList: Unable to process body")
+	}
+
+	if !strings.Contains(string(res), target.filename) {
+		t.Errorf("TestResultsList: Expected to find '%v' in the results:%v", target.filename, string(res))
+	}
+	for _, str := range target.fileList {
+		if !strings.Contains(string(res), str) {
+			t.Errorf("TestResultsList: Expected to find '%v' in the results", str)
+		}
 	}
 }

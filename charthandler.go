@@ -28,6 +28,10 @@ type chartHandler struct {
 	logger    chan metric
 	parent    OutputHandler
 }
+type FileView struct {
+	Filename string
+	FileList []string
+}
 
 func (ch *chartHandler) DealWithIt(r http.Response, t Timer) {
 	ch.logger <- metric{t.GetStart(), t.GetDuration().Nanoseconds()}
@@ -49,6 +53,14 @@ func (ch *chartHandler) statsHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(j)
+}
+func (ch *chartHandler) resultsList(w http.ResponseWriter, r *http.Request) {
+	t, err := template.ParseFiles("index.html")
+	if err != nil {
+		log.Fatal(err)
+	}
+	view := FileView{Filename: ch.filename, FileList: ch.fileList}
+	t.Execute(w, view)
 }
 
 func resultsHandler(w http.ResponseWriter, r *http.Request) {
@@ -109,6 +121,7 @@ func (ch *chartHandler) Start() {
 	r.HandleFunc("/stats", ch.statsHandler).Methods("GET")
 	r.HandleFunc("/results", resultsHandler).Methods("GET")
 	r.HandleFunc("/results/"+ch.filename, resultsHandler).Methods("GET")
+	r.HandleFunc("/", ch.resultsList).Methods("GET")
 
 	loggedRouter := handlers.LoggingHandler(os.Stdout, r)
 

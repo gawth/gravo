@@ -4,6 +4,10 @@
         <meta charset="UTF-8" />
     </head>
     <body>
+        <a href="results/{{.Filename}}">{{.Filename}}</a>
+        {{range .FileList}}
+            {{.}}
+        {{end}}
 
     </body>
 </html>
