@@ -22,6 +22,7 @@ type metric struct {
 
 type chartHandler struct {
 	filename  string
+	fileList  []string
 	completed chan bool
 	data      []metric
 	logger    chan metric

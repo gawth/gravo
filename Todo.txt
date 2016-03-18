@@ -8,14 +8,20 @@
 13. Consider serving up a results page with a link to the inflight results and any previous results
 14. Save results to file in the first format for display later
 15. Default page shows previous results "files", picking on launches with that data
+	Addedd a file list to charthandler
+	Need a new page that displays that list as URLs
+	Need a a stats handler that serves up the right file from its URL
+	Include some navigation
+	The active test is a special case?
+	Or can I read from the output file?
 16. Look at using http://hdrhistogram.org/
 17. Bundle template with exe
 18. Ajax updates to the graph
-19. Finish off string together the different output handlers
 20. URLs are currently hard coded in both the server and the HTML
 21.
 
 DONE
+19. Finish off string together the different output handlers
 20. Fix bug in DealWithIt.  Reading the body leaves the ReadCloser empty for the parent e2f3b4e9f7b0a476d9ff4d2a8683f37703dff439
 7. Need usable output from running gravo - see below OUTPUT
 8. Allow addition of a validator - eval a user specified regex on the output
