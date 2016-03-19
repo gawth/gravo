@@ -40,6 +40,12 @@ func (ch *chartHandler) DealWithIt(r http.Response, t Timer) {
 
 	return
 }
+func (ch *chartHandler) updateData() {
+	for {
+		d := <-ch.logger
+		ch.data = append(ch.data, d)
+	}
+}
 
 func (ch *chartHandler) LogInfo(s string) {
 	ch.parent.LogInfo(s)
@@ -69,13 +75,6 @@ func resultsHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 	t.Execute(w, nil)
-}
-
-func (ch *chartHandler) updateData() {
-	for {
-		d := <-ch.logger
-		ch.data = append(ch.data, d)
-	}
 }
 
 func (ch *chartHandler) loadData() {
