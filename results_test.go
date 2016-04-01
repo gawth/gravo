@@ -5,7 +5,14 @@ import (
 	"time"
 )
 
-func TestResultsSave(t *testing.T) {
+func TestResultsConstructor(t *testing.T) {
+	target := NewResults("fred")
+
+	if target.name != "fred" {
+		t.Errorf("TestResultsConstructor: Expected constructor to set name to fred not %v", target.name)
+	}
+}
+func TestResultsSaveAndRetrieve(t *testing.T) {
 	target := Results{}
 	var data metric
 
