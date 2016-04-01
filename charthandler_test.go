@@ -13,64 +13,9 @@ import (
 	"time"
 )
 
-func TestStatsHandlerHappyPath(t *testing.T) {
-	testfile := "testfile"
-	stub := StubHandler().(*stubHandler)
-	target := ChartHandler(testfile, make(chan bool), stub)
-
-	data := http.Response{
-		Body: ioutil.NopCloser(bytes.NewBufferString("Some data")),
-	}
-	tm := stubTimer{}
-
-	target.Start()
-	target.DealWithIt(data, &tm)
-	target.DealWithIt(data, &tm)
-
-	req, err := http.NewRequest("GET", "http://localhost:8910/stats", nil)
-	if err != nil {
-		t.Errorf("TestStatsHandlerHappyPath: unable to create request")
-	}
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		t.Errorf("TestStatsHandlerHappyPath: Got http error")
-	}
-	results, err := ioutil.ReadAll(resp.Body)
-	resp.Body.Close()
-	if err != nil {
-		t.Errorf("TestStatsHandlerHappyPath: Unable to process body")
-	}
-
-	var out []metric
-	err = json.Unmarshal(results, &out)
-	if err != nil {
-		t.Errorf("TestStatsHandlerHappyPath: Unable to parse json response:%v", results)
-	}
-
-	if len(out) != 2 {
-		t.Errorf("TestStatsHandlerHappyPath: Expected '%v' to be length 2 but was length %v", out, len(out))
-	}
-	req, err = http.NewRequest("GET", "http://localhost:8910/results/"+testfile, nil)
-	if err != nil {
-		t.Errorf("TestStatsHandlerHappyPath: unable to create request")
-	}
-	resp, err = client.Do(req)
-	if err != nil {
-		t.Errorf("TestStatsHandlerHappyPath: Got http error from results")
-	}
-	if resp.StatusCode != 200 {
-		t.Errorf("TestStatsHandlerHappyPath: Got a HTTP %v rather than a 200 from results", resp.StatusCode)
-	}
-	if stub.startCalled == 0 {
-		t.Errorf("TestChartHandlerStartParentCalled: Failed to call Start on the parent")
-	}
-}
-
 func TestStatsHandlerMissingFilename(t *testing.T) {
 	if os.Getenv("CALL") == "1" {
-		target := ChartHandler("", make(chan bool), NullHandler())
+		target := ChartHandler(make(chan bool), &Results{name: ""}, NullHandler())
 		target.Start()
 		return
 	}
@@ -85,10 +30,10 @@ func TestStatsHandlerMissingFilename(t *testing.T) {
 
 func TestStatsHandlerPreLoadedData(t *testing.T) {
 	tm := time.Now()
-	target := ChartHandler("fred", make(chan bool), NullHandler()).(*chartHandler)
+	target := ResultsServer("fred")
 
 	data := []metric{{tm, 123}, {tm, 345}}
-	target.data = data
+	target.data = Results{name: "Res", metrics: data}
 	testServer := httptest.NewServer(http.HandlerFunc(target.statsHandler))
 	defer testServer.Close()
 
@@ -125,7 +70,7 @@ func TestGenerateFilename(t *testing.T) {
 }
 
 func TestDealWithIt(t *testing.T) {
-	target := ChartHandler("", make(chan bool), nil).(*chartHandler)
+	target := ChartHandler(make(chan bool), &Results{}, nil).(*chartHandler)
 	var response http.Response
 	metricReceived := false
 
@@ -150,7 +95,7 @@ func TestDealWithIt(t *testing.T) {
 }
 func TestDealWithItParentTest(t *testing.T) {
 	stub := StubHandler().(*stubHandler)
-	target := ChartHandler("", make(chan bool), stub).(*chartHandler)
+	target := ChartHandler(make(chan bool), &Results{}, stub).(*chartHandler)
 
 	expectedData := []byte("Expected Data")
 	var response http.Response
@@ -179,7 +124,7 @@ func TestDealWithItParentTest(t *testing.T) {
 }
 func TestChartHandlerLogInfoParent(t *testing.T) {
 	stub := StubHandler().(*stubHandler)
-	target := ChartHandler("", make(chan bool), stub).(*chartHandler)
+	target := ChartHandler(make(chan bool), &Results{}, stub).(*chartHandler)
 
 	target.LogInfo("Blahh")
 
@@ -196,18 +141,19 @@ func TestChartHandlerParseData(t *testing.T) {
 	buf.Write(rawBytes)
 	data := ioutil.NopCloser(buf)
 
-	stub := StubHandler().(*stubHandler)
-	target := ChartHandler("", make(chan bool), stub).(*chartHandler)
+	target := ResultsServer("fred")
 
 	target.parseData(data)
-	if len(target.data) != 2 {
-		t.Errorf("TestChartHandlerParseData: Expected two metrics to be stored, got %v", len(target.data))
+	if len(target.data.metrics) != 2 {
+		t.Errorf("TestChartHandlerParseData: Expected two metrics to be stored, got %v", len(target.data.metrics))
 	}
 }
 
 func TestResultsList(t *testing.T) {
-	target := ChartHandler("fred", make(chan bool), NullHandler()).(*chartHandler)
-	target.fileList = []string{"file1", "file2"}
+	target := ResultsServer("ferd")
+	files := ResultsList{}
+	files.filelist = []string{"file1", "file2"}
+	target.savedResults = files
 
 	testServer := httptest.NewServer(http.HandlerFunc(target.resultsList))
 	defer testServer.Close()
@@ -223,10 +169,10 @@ func TestResultsList(t *testing.T) {
 		t.Errorf("TestResultsList: Unable to process body")
 	}
 
-	if !strings.Contains(string(res), target.filename) {
-		t.Errorf("TestResultsList: Expected to find '%v' in the results:%v", target.filename, string(res))
+	if !strings.Contains(string(res), target.data.Name()) {
+		t.Errorf("TestResultsList: Expected to find '%v' in the results:%v", target.data.Name(), string(res))
 	}
-	for _, str := range target.fileList {
+	for _, str := range files.filelist {
 		if !strings.Contains(string(res), str) {
 			t.Errorf("TestResultsList: Expected to find '%v' in the results", str)
 		}

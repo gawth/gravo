@@ -123,8 +123,11 @@ func main() {
 	}
 	output = StandardOutput(c.Verbose, validator, nil)
 
+	server := ResultsServer(resultsFile)
+	server.Start()
+
 	waitforit := make(chan bool)
-	results := ChartHandler(resultsFile, waitforit, output)
+	results := ChartHandler(waitforit, &server.data, output)
 	results.Start()
 
 	if displayResults {
